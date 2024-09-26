@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'lucide-react';
-function AdminDashboard() {
+function AdminUsers() {
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '20px' }}>
@@ -67,4 +67,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default AdminUsers;

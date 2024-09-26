@@ -15,7 +15,8 @@ import UnauthPage from "./pages/unauth";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
-
+import Info from "./pages/user-view/info";
+import AdminUsers from "./pages/admin-view/dashboard";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -29,10 +30,7 @@ function App() {
 
   return (
     <div className="flex flex-col max-h-screen w-screen overflow-hidden bg-white">
-      {/* Header */}
-      {/* <header className="bg-gray-800 text-white p-4 w-full">
-          <h1 className="text-2xl font-bold text-center">Header component</h1>
-        </header> */}
+      
 
       {/* Main Content */}
       <main className="flex flex-1 w-full">
@@ -62,6 +60,7 @@ function App() {
           >
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
           <Route
             path="/user"
@@ -73,6 +72,8 @@ function App() {
           >
             <Route path="home" element={<UserHome />} />
             <Route path="account" element={<UserAccount />} />
+            <Route path="info" element={<Info />} />
+            
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
