@@ -17,6 +17,7 @@ import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
 import Info from "./pages/user-view/info";
 import AdminUsers from "./pages/admin-view/dashboard";
+import UserNews from "./pages/user-view/news";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -73,7 +74,7 @@ function App() {
             <Route path="home" element={<UserHome />} />
             <Route path="account" element={<UserAccount />} />
             <Route path="info" element={<Info />} />
-            
+            <Route path="news" element={<UserNews />} />
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
