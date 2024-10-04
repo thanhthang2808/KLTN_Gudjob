@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import UserSearch from './search';
-import UserListJob from './listjob';
+import CandidateSearch from './search';
+import CandidateJobList from './joblist';
 import money from '@/assets/money.svg';
 import location from '@/assets/location.svg';
 import experience from '@/assets/experience.svg';
@@ -15,11 +15,11 @@ import numberpeople from '@/assets/numberpeople.svg';
 import job from '@/assets/job.svg';
 import gender from '@/assets/gender.svg';
 
-function UserNews() {
+function CandidateNews() {
   return (
     <div style={{ height: '80vh', overflowY: 'auto',flex:1 }}>
         {/* Header */}
-          <UserSearch />
+          <CandidateSearch />
           <div style={{ display: 'flex', height: 'auto' }}>
             {/* Bên trái chiếm 60% */}
             <div style={{ flex: 6.5, padding: '20px', marginRight:'5px'}}>
@@ -199,4 +199,4 @@ function UserNews() {
 );
 }
 
-export default UserNews;
+export default CandidateNews;

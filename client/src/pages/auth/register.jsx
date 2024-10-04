@@ -7,10 +7,11 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
 const initialState = {
-  userName: "",
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
+  role: "",
 };
 function AuthRegister() {
   const [formData, setFormData] = useState(initialState);

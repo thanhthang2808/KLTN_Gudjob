@@ -2,7 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth/auth-routes");
+const userRoutes = require("./routes/user/user-routes");
+const jobRoutes = require("./routes/job/job-routes");
+
+dotenv.config();
 
 mongoose
   .connect(
@@ -32,5 +37,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/job", jobRoutes);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

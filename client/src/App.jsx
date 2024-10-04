@@ -6,18 +6,22 @@ import AuthRegister from "./pages/auth/register";
 import AdminLayout from "./components/admin-view/layout";
 import AdminDashboard from "./pages/admin-view/dashboard";
 import AdminTransactions from "./pages/admin-view/transactions";
-import UserLayout from "./components/user-view/layout";
+import UserLayout from "./components/user-view/candidate/layout";
 import NotFound from "./pages/not-found";
-import UserHome from "./pages/user-view/home";
-import UserAccount from "./pages/user-view/account";
+import CandidateHome from "./pages/user-view/candidate/home";
+import CandidateAccount from "./pages/user-view/candidate/account";
 import CheckAuth from "./components/common/check-auth";
 import UnauthPage from "./pages/unauth";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
-import Info from "./pages/user-view/info";
+import CandidateProfie from "./pages/user-view/candidate/profie";
 import AdminUsers from "./pages/admin-view/dashboard";
-import UserNews from "./pages/user-view/news";
+import CandidateNews from "./pages/user-view/candidate/news";
+import RecruiterHome from "./pages/user-view/recruiter/home";
+import PostJob from "./pages/user-view/recruiter/postjob";
+import RecruiterLayout from "./components/user-view/recruiter/layout";
+import MyPosts from "./pages/user-view/recruiter/mypost";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -30,7 +34,7 @@ function App() {
   ;
 
   return (
-    <div className="flex flex-col max-h-screen w-screen overflow-hidden bg-white">
+    <div className="flex flex-col max-h-screen w-screen">
       
 
       {/* Main Content */}
@@ -64,17 +68,29 @@ function App() {
             <Route path="users" element={<AdminUsers />} />
           </Route>
           <Route
-            path="/user"
+            path="/candidate"
             element={
               <CheckAuth isAuthenticated={isAuthenticated} user={user}>
                 <UserLayout />
               </CheckAuth>
             }
           >
-            <Route path="home" element={<UserHome />} />
-            <Route path="account" element={<UserAccount />} />
-            <Route path="info" element={<Info />} />
-            <Route path="news" element={<UserNews />} />
+            <Route path="home" element={<CandidateHome />} />
+            <Route path="account" element={<CandidateAccount />} />
+            <Route path="profie" element={<CandidateProfie />} />
+            <Route path="news" element={<CandidateNews />} />
+          </Route>
+          <Route
+            path="/recruiter"
+            element={
+              <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                <RecruiterLayout />
+              </CheckAuth>
+            }
+          >
+            <Route path="home" element={<RecruiterHome />} />
+            <Route path="myposts" element={<MyPosts />} />
+            <Route path="postjob" element={<PostJob />} /> 
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />

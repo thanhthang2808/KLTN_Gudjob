@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function UserSearch() {
+function CandidateSearch() {
   const [filterType, setFilterType] = useState('');
   const [secondSelect, setSecondSelect] = useState('');
 
@@ -79,4 +79,4 @@ function UserSearch() {
   );
 }
 
-export default UserSearch;
+export default CandidateSearch;

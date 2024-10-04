@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../../models/User");
 //register
 const registerUser = async (req, res) => {
-  const { userName, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
     const checkUser = await User.findOne({ email });
@@ -11,7 +11,7 @@ const registerUser = async (req, res) => {
       return res.json({ success: false, message: "Email already exists" });
 
     const hashPassword = await bcrypt.hash(password, 12);
-    const newUser = new User({ userName, email, password: hashPassword });
+    const newUser = new User({ name, email, password: hashPassword, role });
 
     await newUser.save();
     res.status(200).json({ success: true, message: "Registration succesful" });
@@ -52,7 +52,6 @@ const loginUser = async (req, res) => {
       user: {
         email: checkUser.email,
         role: checkUser.role,
-        userName: checkUser.userName, // luu y khong them userName vao token
         id: checkUser._id, 
       },
     });
