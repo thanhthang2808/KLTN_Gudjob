@@ -127,6 +127,17 @@ button:focus-visible {
   }
 }
 
+input, textarea, select {
+  background-color: hsl(var(--input)); /* Nền tối cho ô nhập */
+  color: hsl(var(--foreground)); /* Chữ sáng cho ô nhập */
+  border: 1px solid hsl(var(--border)); /* Viền cho ô nhập */
+}
+
+body {
+  background-color: hsl(var(--background)); /* Nền tối */
+  color: hsl(var(--foreground)); /* Màu chữ sáng */
+}
+
 @layer base {
   * {
     @apply border-border;

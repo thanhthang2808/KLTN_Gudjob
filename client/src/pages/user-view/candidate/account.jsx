@@ -1,4 +1,4 @@
-function UserAccount() {
+function CandidateAccount() {
   return (
     <div>
       <h1>Account</h1>
@@ -6,4 +6,4 @@ function UserAccount() {
   );
 }
 
-export default UserAccount;
+export default CandidateAccount;
