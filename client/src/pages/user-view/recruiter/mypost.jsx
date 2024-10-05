@@ -60,28 +60,15 @@ const MyPosts = () => {
       const res = await axios.delete(`${API_URL}/api/job/delete/${jobId}`, {
         withCredentials: true,
       });
-      
-      // Hiển thị thông báo thành công
       toast.success(res.data.message);
-      
-      // Cập nhật danh sách công việc
-      setMyJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
-
-      // Hiển thị modal thông báo
+      setMyJobs((prevJobs) => prevJobs.filter((job) => job._id !== jobId));
       setShowModal(true);
-
-      // Tải lại trang sau 1 giây
       setTimeout(() => {
         setShowModal(false);
-        window.location.reload(); // Làm mới toàn bộ trang
-    }, 1000);
+        window.location.reload();
+      }, 1000);
     } catch (error) {
-      // Kiểm tra xem có phản hồi lỗi không
-      if (error.response && error.response.data) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Có lỗi xảy ra trong quá trình xóa công việc!");
-      }
+      toast.error(error.response ? error.response.data.message : "Có lỗi xảy ra trong quá trình xóa công việc!");
     }
   };
 
@@ -97,7 +84,7 @@ const MyPosts = () => {
     <div className="myJobs page bg-gray-100 min-h-screen p-5">
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold mb-6">Your Posted Jobs</h1>
-        {/* Nút New Post */}
+        {/* New Post Button */}
         <div className="mb-4">
           <Link to="/recruiter/postjob">
             <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
@@ -240,7 +227,7 @@ const MyPosts = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">You have no posted jobs yet.</p>
+          <p className="text-center">You have not posted any jobs yet.</p>
         )}
       </div>
     </div>

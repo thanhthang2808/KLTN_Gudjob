@@ -9,25 +9,36 @@ import { Link, useNavigate } from "react-router-dom";
 const initialState = {
   name: "",
   email: "",
+  avatar: "",
   password: "",
   confirmPassword: "",
   role: "",
+  companyName: "",
+  address: "",
 };
+
 function AuthRegister() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   function onSubmit(event) {
     event.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      setError("Confirm password is incorrect"); 
-      return; 
+      setError("Confirm password is incorrect");
+      return;
     }
+
+    // Validate for Recruiter fields
+    if (formData.role === "Recruiter" && (!formData.companyName || !formData.address)) {
+      setError("Company Name and Address are required for Recruiter");
+      return;
+    }
+
     dispatch(registerUser(formData)).then((data) => {
-      if(data?.payload?.success) {
+      if (data?.payload?.success) {
         toast({
           title: data?.payload?.message,
           variant: "success",
@@ -38,6 +49,28 @@ function AuthRegister() {
         return;
       }
     });
+  }
+
+  // Update form controls based on role selection
+  const dynamicFormControls = [...registerFormControls];
+
+  if (formData.role === "Recruiter") {
+    dynamicFormControls.push(
+      {
+        name: "companyName",
+        label: "Company Name",
+        placeholder: "Enter your company name",
+        componentType: "input",
+        type: "text",
+      },
+      {
+        name: "address",
+        label: "Address",
+        placeholder: "Enter your company address",
+        componentType: "input",
+        type: "text",
+      }
+    );
   }
 
   return (
@@ -64,7 +97,7 @@ function AuthRegister() {
       )}
 
       <CommonForm
-        formControls={registerFormControls}
+        formControls={dynamicFormControls}
         buttonText={"Sign up"}
         formData={formData}
         setFormData={setFormData}

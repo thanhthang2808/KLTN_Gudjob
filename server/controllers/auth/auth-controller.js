@@ -3,23 +3,34 @@ const jwt = require("jsonwebtoken");
 const User = require("../../models/User");
 //register
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, avatar, password, role, companyName, address } = req.body;
 
   try {
     const checkUser = await User.findOne({ email });
-    if (checkUser)
+    if (checkUser) {
       return res.json({ success: false, message: "Email already exists" });
+    }
 
     const hashPassword = await bcrypt.hash(password, 12);
-    const newUser = new User({ name, email, password: hashPassword, role });
+
+    // Tạo đối tượng người dùng mới với các trường bổ sung
+    const newUser = new User({
+      name,
+      email,
+      avatar,
+      password: hashPassword,
+      role,
+      ...(role === "Recruiter" && { companyName, address }), // Thêm trường companyName và address nếu là Recruiter
+    });
 
     await newUser.save();
-    res.status(200).json({ success: true, message: "Registration succesful" });
+    res.status(200).json({ success: true, message: "Registration successful" });
   } catch (e) {
     console.log(e);
-    res.status(500).json({ success: false, message: "Some error occured" });
+    res.status(500).json({ success: false, message: "Some error occurred" });
   }
 };
+
 
 //login
 const loginUser = async (req, res) => {
@@ -43,7 +54,7 @@ const loginUser = async (req, res) => {
         email: checkUser.email,
       },
       "CLIENT_SECRET_KEY",
-      { expiresIn: "1h" }
+      { expiresIn: "10h" }
     );
 
     res.cookie("token", token, { httpOnly: true, secure: false }).json({

@@ -8,7 +8,7 @@ import logo from '@/assets/logo-placeholder.png';
 import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 
-function UserHeader() {
+function CandidateHeader() {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth); 
     const navigate = useNavigate(); 
@@ -38,7 +38,7 @@ function UserHeader() {
         getInfo();
     }, []);
 
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState('');
 
     const handleUserClick = () => {
         navigate('/candidate/profile'); 
@@ -48,9 +48,19 @@ function UserHeader() {
         navigate('/candidate/home'); 
     };
 
+    const handleNavigation = (item) => {
+        if (item === 'My Applications') {
+            // Điều hướng đến trang myapplications nếu chọn "My Applications"
+            navigate('/candidate/myapplications');
+        } else {
+            // Mở dropdown cho các mục khác
+            setDropdownOpen((prev) => (prev === item ? '' : item));
+        }
+    };
+
     return (
         <header className="flex items-center justify-between max-w-full p-4 bg-gray-900 text-white shadow-md">
-            {/* Logo */}
+            {/* Logo */} 
             <div className="flex items-center cursor-pointer" onClick={handleUserClickHome}>
                 <img src={logo} alt="Logo" className="w-20 h-auto" />
             </div>
@@ -58,15 +68,15 @@ function UserHeader() {
             {/* Navigation Menu */}
             <nav className="flex-grow mx-10">
                 <ul className="flex space-x-6">
-                    {['Jobs', 'Company', 'Tools', 'Forum'].map((item) => (
+                    {['Jobs', 'Company', 'My Applications', 'Forum'].map((item) => (
                         <li key={item} className="relative group">
                             <button
-                                onClick={() => setDropdownOpen((prev) => (prev === item ? '' : item))}
+                                onClick={() => handleNavigation(item)}
                                 className="px-4 py-2 hover:bg-gray-700 rounded transition duration-150"
                             >
                                 {item}
                             </button>
-                            {dropdownOpen === item && (
+                            {dropdownOpen === item && item !== 'My Applications' && (
                                 <ul className="absolute left-0 mt-2 w-40 bg-gray-800 rounded shadow-lg">
                                     <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 1</li>
                                     <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 2</li>
@@ -96,4 +106,4 @@ function UserHeader() {
     );
 }
 
-export default UserHeader;
+export default CandidateHeader;

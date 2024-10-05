@@ -25,16 +25,40 @@ const userSchema = new mongoose.Schema({
   avatar: {
     public_id: {
       type: String,
-      required: true,
     },
     url: {
       type: String,
-      required: true,
     },
   },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  // Thông tin bổ sung cho Recruiter
+  companyName: {
+    type: String,
+    required: function () {
+      return this.role === "Recruiter";
+    },
+  },
+  website: {
+    type: String,
+  },
+  address: {
+    type: String,
+    required: function () {
+      return this.role === "Recruiter";
+    },
+  },
+  numberOfEmployees: {
+    type: Number,
+  },
+  // Thông tin bổ sung cho Candidate
+  skills: {
+    type: [String], // Mảng chứa các kỹ năng
+  },
+  experience: {
+    type: String, // Mô tả kinh nghiệm làm việc
   },
 });
 

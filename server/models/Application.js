@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import validator from "validator";
+const mongoose = require("mongoose");
+const validator = require("validator"); 
 
 const applicationSchema = new mongoose.Schema({
   name: {
@@ -28,12 +28,17 @@ const applicationSchema = new mongoose.Schema({
   resume: {
     public_id: {
       type: String, 
-      required: true,
+      required: false,
     },
     url: {
       type: String, 
-      required: true,
+      required: false,
     },
+  },
+  jobID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Job",
+    required: false
   },
   applicantID: {
     user: {
@@ -61,4 +66,4 @@ const applicationSchema = new mongoose.Schema({
   },
 });
 
-export const Application = mongoose.model("Application", applicationSchema);
+module.exports = mongoose.model("Application", applicationSchema);

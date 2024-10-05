@@ -164,24 +164,24 @@ const deleteJob = async (req, res) => {
   }
 };
 
-// export const getSingleJob = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const job = await Job.findById(id);
-//     if (!job) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Job not found.",
-//       });
-//     }
+const getSingleJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const job = await Job.findById(id);
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found.",
+      });
+    }
 
-//     res.status(200).json({
-//       success: true,
-//       job,
-//     });
-//   } catch (error) {
-//     res.status(404).json({ success: false, message: `Invalid ID / CastError` });
-//   }
-// };
+    res.status(200).json({
+      success: true,
+      job,
+    });
+  } catch (error) {
+    res.status(404).json({ success: false, message: `Invalid ID / CastError` });
+  }
+};
 
-module.exports = { getAllJobs, postJob, getMyJobs, deleteJob};
+module.exports = { getAllJobs, postJob, getMyJobs, deleteJob, getSingleJob};

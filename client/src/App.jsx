@@ -6,7 +6,7 @@ import AuthRegister from "./pages/auth/register";
 import AdminLayout from "./components/admin-view/layout";
 import AdminDashboard from "./pages/admin-view/dashboard";
 import AdminTransactions from "./pages/admin-view/transactions";
-import UserLayout from "./components/user-view/candidate/layout";
+import CandidateLayout from "./components/user-view/candidate/layout";
 import NotFound from "./pages/not-found";
 import CandidateHome from "./pages/user-view/candidate/home";
 import CandidateAccount from "./pages/user-view/candidate/account";
@@ -15,13 +15,16 @@ import UnauthPage from "./pages/unauth";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
-import CandidateProfie from "./pages/user-view/candidate/profie";
+import CandidateProfile from "./pages/user-view/candidate/profile";
 import AdminUsers from "./pages/admin-view/dashboard";
 import CandidateNews from "./pages/user-view/candidate/news";
 import RecruiterHome from "./pages/user-view/recruiter/home";
 import PostJob from "./pages/user-view/recruiter/postjob";
 import RecruiterLayout from "./components/user-view/recruiter/layout";
 import MyPosts from "./pages/user-view/recruiter/mypost";
+import JobDetails from "./pages/user-view/candidate/jobdetails";
+import Application from "./pages/user-view/candidate/application";
+import MyApplications from "./pages/user-view/candidate/myapplications";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -71,13 +74,16 @@ function App() {
             path="/candidate"
             element={
               <CheckAuth isAuthenticated={isAuthenticated} user={user}>
-                <UserLayout />
+                <CandidateLayout />
               </CheckAuth>
             }
           >
             <Route path="home" element={<CandidateHome />} />
             <Route path="account" element={<CandidateAccount />} />
-            <Route path="profie" element={<CandidateProfie />} />
+            <Route path="profile" element={<CandidateProfile />} />
+            <Route path="job/:id" element={<JobDetails />} />
+            <Route path="application/:id" element={<Application />} />
+            <Route path="myapplications" element={<MyApplications />} />
             <Route path="news" element={<CandidateNews />} />
           </Route>
           <Route
