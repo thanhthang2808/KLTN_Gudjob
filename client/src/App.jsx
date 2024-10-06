@@ -6,6 +6,7 @@ import AuthRegister from "./pages/auth/register";
 import AdminLayout from "./components/admin-view/layout";
 import AdminDashboard from "./pages/admin-view/dashboard";
 import AdminTransactions from "./pages/admin-view/transactions";
+import AdminManager from "./pages/admin-view/manager";
 import CandidateLayout from "./components/user-view/candidate/layout";
 import NotFound from "./pages/not-found";
 import CandidateHome from "./pages/user-view/candidate/home";
@@ -16,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
 import CandidateProfile from "./pages/user-view/candidate/profile";
-import AdminUsers from "./pages/admin-view/dashboard";
+import AdminUsers from "./pages/admin-view/users";
 import CandidateNews from "./pages/user-view/candidate/news";
 import RecruiterHome from "./pages/user-view/recruiter/home";
 import PostJob from "./pages/user-view/recruiter/postjob";
@@ -68,6 +69,7 @@ function App() {
           >
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="managers" element={<AdminManager />} />
             <Route path="users" element={<AdminUsers />} />
           </Route>
           <Route
