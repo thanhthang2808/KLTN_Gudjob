@@ -16,9 +16,9 @@ import {
       icon: <LayoutDashboard />,
     },
     {
-      id: "users",
-      label: "Users",
-      path: "/admin/users",
+      id: "manager",
+      label: "Manager",
+      path: "/admin/managers",
       icon: <SquareUserRound />
     },
     {
