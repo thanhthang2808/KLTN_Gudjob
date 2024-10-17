@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     url: {
       type: String,
+      default: "https://res.cloudinary.com/dpocdj6eu/image/upload/v1728065130/ksf2naqlfcnahv1ck1cm.png",
     },
   },
   createdAt: {

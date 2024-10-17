@@ -9,6 +9,7 @@ router.get("/getmyjobs", authMiddleware, getMyJobs);
 router.delete("/delete/:id", authMiddleware, deleteJob);
 router.get("/:id", authMiddleware, getSingleJob);
 
+
 module.exports = router;
 // import express from "express";
 // import {
