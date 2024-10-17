@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react"; // import useEffect
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Modal from "react-modal";
@@ -17,6 +17,28 @@ const Application = () => {
 
   const navigateTo = useNavigate();
   const { id } = useParams();
+
+  // Use useEffect to fetch user data when the component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/user/user-info`, {
+          withCredentials: true,
+        });
+        const user = response.data.user;
+
+        // Set user data to state
+        setName(user.name);
+        setEmail(user.email);
+        setPhone(user.phone);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load user data.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleFileChange = (event) => {
     const selectedResume = event.target.files[0];
@@ -52,10 +74,7 @@ const Application = () => {
       );
 
       // Reset form fields
-      setName("");
-      setEmail("");
       setCoverLetter("");
-      setPhone("");
       setAddress("");
       setResume(null);
 

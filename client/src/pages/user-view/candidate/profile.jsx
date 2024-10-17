@@ -5,7 +5,7 @@ import avatarDefault from "@/assets/default-user.png";
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 const CandidateProfile = () => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [editedUser, setEditedUser] = useState({});
     const [isJobSeeking, setIsJobSeeking] = useState(false);
@@ -33,12 +33,12 @@ const CandidateProfile = () => {
 
     const saveChanges = async () => {
         try {
-            // await axios.put(`${API_URL}/api/user/update-info`, editedUser, {
-            //     withCredentials: true,
-            // });
-            // setUser(editedUser);
-            // setIsEditing(false);
-            // setMessage('Cập nhật thông tin thành công!');
+            await axios.put(`${API_URL}/api/user/update-info`, editedUser, {
+                withCredentials: true,
+            });
+            setUser(editedUser);
+            setIsEditing(false);
+            setMessage('Cập nhật thông tin thành công!');
         } catch (error) {
             console.error("Lỗi khi cập nhật thông tin người dùng:", error);
             setMessage('Có lỗi xảy ra khi cập nhật thông tin!');
@@ -75,13 +75,19 @@ const CandidateProfile = () => {
                 }
             );
 
-            setUser((prevUser) => ({
-                ...prevUser,
-                avatar: response.data.avatar,
-            }));
-            setMessage('Cập nhật avatar thành công!');
-            setPreview(null);
-            setAvatar(null);
+            // Kiểm tra và cập nhật lại avatar
+            if (response.data?.avatar) {
+                setUser((prevUser) => ({
+                    ...prevUser,
+                    avatar: response.data.avatar,
+                }));
+                setMessage('Cập nhật avatar thành công!');
+                setPreview(null);
+                setAvatar(null);
+            } else {
+                setMessage('Có lỗi xảy ra khi cập nhật avatar!');
+            }
+
         } catch (error) {
             console.error("Lỗi khi cập nhật avatar:", error.response ? error.response.data : error.message);
             setMessage('Có lỗi xảy ra khi cập nhật avatar!');
@@ -146,9 +152,9 @@ const CandidateProfile = () => {
             <div className="w-full md:w-1/5 bg-white shadow-lg rounded-lg p-6">
                 <div className="flex items-center">
                     <img
-                        src={user?.avatar || avatarDefault}
+                        src={avatarDefault}
                         alt="Avatar"
-                        className="w-24 h-24 rounded-full object-cover mb-4 cursor-pointer"
+                        className="w-24 h-24 rounded-full object-cover mb-4 cursor-pointer shadow-lg"
                         onClick={() => setIsModalOpen(true)} // Mở modal khi nhấn vào avatar
                     />
                     <h2 className="text-lg font-semibold ml-4">{user?.name}</h2>

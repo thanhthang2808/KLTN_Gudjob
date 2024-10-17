@@ -45,7 +45,9 @@ const postApplication = async (req, res) => {
       user: jobDetails.postedBy,
       role: "Recruiter",
     };
-    if (!name || !email || !coverLetter || !phone || !address || !applicantID || !employerID || !resume) {
+
+    const jobID = jobId;
+    if (!name || !email || !coverLetter || !phone || !address || !applicantID || !employerID || !resume || !jobID) {
       return res.status(400).json({ message: "Please fill all fields." });
     }
 
@@ -55,7 +57,7 @@ const postApplication = async (req, res) => {
       coverLetter,
       phone,
       address,
-      jobId,
+      jobID,
       applicantID,
       employerID,
       resume: {
@@ -80,8 +82,8 @@ const recruiterGetAllApplications = async (req, res) => {
     if (role === "Candidate") {
       return res.status(400).json({ message: "Candidate not allowed to access this resource." });
     }
-    const { _id } = req.user;
-    const applications = await Application.find({ "employerID.user": _id });
+    const { id } = req.user;
+    const applications = await Application.find({ "employerID.user": id });
     res.status(200).json({
       success: true,
       applications,
@@ -147,6 +149,47 @@ const candidateDeleteApplication = async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
+  const acceptApplication = async (req, res) => {
+    try {
+      const { id } = req.params; // Get the application ID from request parameters
+      const application = await Application.findById(id);
+  
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+  
+      // Update the application status to 'Accepted'
+      application.status = "Accepted";
+      await application.save();
+  
+      return res.status(200).json({ message: "Application accepted successfully", application });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to accept application", error: error.message });
+    }
+  };
+  
+  // Reject an application
+  const rejectApplication = async (req, res) => {
+    try {
+      const { id } = req.params; // Get the application ID from request parameters
+      const application = await Application.findById(id);
+  
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+  
+      // Update the application status to 'Rejected'
+      application.status = "Rejected";
+      await application.save();
+  
+      return res.status(200).json({ message: "Application rejected successfully", application });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to reject application", error: error.message });
+    }
+  };
   
 
-module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication };
+module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication };

@@ -65,6 +65,21 @@ const MyApplications = () => {
     }
   };
 
+  const getJobInfo = (id) => {
+    try {
+      axios
+        .get(`${API_URL}/api/job/getSingleJob/${id}`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          return res.data.job;
+        });
+    }
+    catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+
   const openModal = (imageUrl) => {
     setResumeImageUrl(imageUrl);
     setModalOpen(true);
@@ -147,6 +162,9 @@ const JobSeekerCard = ({ element, deleteApplication, openModal }) => {
         </p>
         <p className="text-lg font-semibold text-gray-700 truncate">
           <span className="font-bold text-gray-900">Cover Letter:</span> {element.coverLetter}
+        </p>
+        <p className="text-lg font-semibold text-gray-700 truncate">
+          <span className="font-bold text-gray-900">JobID:</span> {element.jobID}
         </p>
       </div>
 

@@ -25,6 +25,7 @@ import MyPosts from "./pages/user-view/recruiter/mypost";
 import JobDetails from "./pages/user-view/candidate/jobdetails";
 import Application from "./pages/user-view/candidate/application";
 import MyApplications from "./pages/user-view/candidate/myapplications";
+import ApplicationsFromCandidate from "./pages/user-view/recruiter/applications-from-candidate";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -97,6 +98,7 @@ function App() {
             <Route path="home" element={<RecruiterHome />} />
             <Route path="myposts" element={<MyPosts />} />
             <Route path="postjob" element={<PostJob />} /> 
+            <Route path="candidate-applications" element={<ApplicationsFromCandidate />} />
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />

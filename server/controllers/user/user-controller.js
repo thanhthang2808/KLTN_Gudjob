@@ -15,41 +15,58 @@ const getUserInfo = async (req, res) => {
 
 // Cập nhật avatar người dùng
 const updateAvatar = async (req, res) => {
-    try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "Người dùng không tồn tại" });
+  try {
+    const { id } = req.user; // Giả sử người dùng đã đăng nhập và thông tin user có sẵn
+    console.log("avatar:", req.files);
+    
+    // Kiểm tra nếu không có file được tải lên
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ message: "Avatar file required!" });
     }
 
-    // Xóa avatar cũ nếu có
-    if (user.avatar.public_id) {
-      await cloudinary.uploader.destroy(user.avatar.public_id);
+    const { avatar } = req.files;
+
+    // Các định dạng file được phép (có thể bao gồm ảnh)
+    const allowedFormats = ["image/png", "image/jpeg", "image/jpg"];
+    if (!allowedFormats.includes(avatar.mimetype)) {
+      return res.status(400).json({ message: "Invalid file type. Please upload a PNG or JPEG file." });
     }
 
-    // Tải lên avatar mới
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "avatars",
-      width: 150,
-      crop: "scale",
-    });
+    // Upload avatar lên Cloudinary
+    const cloudinaryResponse = await cloudinary.uploader.upload(avatar.tempFilePath);
 
-    // Cập nhật avatar mới vào người dùng
-    user.avatar = {
-      public_id: result.public_id,
-      url: result.secure_url,
-    };
+    // Xử lý lỗi khi upload lên Cloudinary
+    if (!cloudinaryResponse || cloudinaryResponse.error) {
+      console.error("Cloudinary Error:", cloudinaryResponse.error || "Unknown Cloudinary error");
+      return res.status(500).json({ message: "Failed to upload avatar to Cloudinary" });
+    }
 
-    await user.save();
+    // Cập nhật avatar trong cơ sở dữ liệu cho user
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        avatar: {
+          public_id: cloudinaryResponse.public_id,
+          url: cloudinaryResponse.secure_url,
+        },
+      },
+      { new: true } // Trả về user đã được cập nhật
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found!" });
+    }
 
     res.status(200).json({
       success: true,
-      message: "Cập nhật avatar thành công!",
-      avatar: user.avatar,
+      message: "Avatar updated successfully!",
+      user: updatedUser,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.error("Error in updateAvatar:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 module.exports = { getUserInfo, updateAvatar };
