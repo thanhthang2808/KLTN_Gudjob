@@ -8,7 +8,14 @@ const API_URL = import.meta.env.VITE_REACT_APP_API_URL; // Replace this with you
 
 function CandidateJobList() {
   const [jobs, setJobs] = useState([]);
+  const [avatars, setAvatars] = useState({});
+  const [companyNames, setCompanyNames] = useState({});
   const navigate = useNavigate();
+
+  // Format number to add dots every 3 digits
+  const formatSalary = (salary) => {
+    return salary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
 
   // Fetch all jobs from the API
   useEffect(() => {
@@ -26,6 +33,49 @@ function CandidateJobList() {
     fetchJobs();
   }, []);
 
+  // Fetch avatars and company names for each job's poster
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const userPromises = jobs.map((job) =>
+        axios
+          .get(`${API_URL}/api/user/${job.postedBy}`, { withCredentials: true })
+          .then((userResponse) => {
+            const avatarUrl = userResponse.data.user.avatar?.url;
+            const companyName = userResponse.data.user.companyName; // Assuming companyName is in the user response
+            return {
+              id: job._id,
+              avatar: avatarUrl || anhmau,
+              companyName: companyName || "Company Name", // Fallback if undefined
+            };
+          })
+          .catch((error) => {
+            console.error("Error fetching user details:", error);
+            return {
+              id: job._id,
+              avatar: anhmau, // Fallback to default image on error
+              companyName: "Company Name", // Fallback if error occurs
+            };
+          })
+      );
+
+      const userData = await Promise.all(userPromises);
+      const avatarMap = {};
+      const companyMap = {};
+
+      userData.forEach(({ id, avatar, companyName }) => {
+        avatarMap[id] = avatar;
+        companyMap[id] = companyName;
+      });
+
+      setAvatars(avatarMap);
+      setCompanyNames(companyMap);
+    };
+
+    if (jobs.length > 0) {
+      fetchUserDetails();
+    }
+  }, [jobs]);
+
   // Handle click event to navigate to user news page
   const handleUserClickNews = (id) => {
     navigate(`/candidate/job/${id}`); // Navigate to job details page based on job ID
@@ -42,21 +92,18 @@ function CandidateJobList() {
           >
             <div className="flex">
               <img
-                src={anhmau}
+                src={avatars[job._id] || anhmau} // Display avatar or fallback to default
                 alt="Company Avatar"
                 className="w-16 h-16 rounded-full mr-4"
               />
               <div className="flex-grow">
-                <strong
-                  className="text-lg text-red-600 cursor-pointer hover:underline mb-1" // Added margin-bottom for spacing
-                >
+                <strong className="text-lg text-red-600 cursor-pointer hover:underline mb-1">
                   {job.title}
                 </strong>
-                <div className="text-gray-600 text-sm">
-                  {job.companyName || "companyname"}
+                <div className="text-gray-600 text-sm mb-1">
+                  {companyNames[job._id] || "Company Name"} {/* Display company name */}
                 </div>
                 <div className="flex space-x-3 text-gray-400 text-xs mt-2">
-                  {/* Flex container for city and date with margin-top */}
                   <div>{job.city}</div>
                   <div>
                     {job.jobPostedOn && Date.parse(job.jobPostedOn)
@@ -69,8 +116,8 @@ function CandidateJobList() {
               <div className="flex flex-col items-end">
                 <h2 className="bg-yellow-200 rounded-lg px-2 py-1 text-sm text-center">
                   {job.fixedSalary
-                    ? `${job.fixedSalary} Triệu`
-                    : `${job.salaryFrom}-${job.salaryTo} Triệu`}
+                    ? `${formatSalary(job.fixedSalary)} VNĐ`
+                    : `${formatSalary(job.salaryFrom)}-${formatSalary(job.salaryTo)} VNĐ`}
                 </h2>
                 <img
                   src={heart}
