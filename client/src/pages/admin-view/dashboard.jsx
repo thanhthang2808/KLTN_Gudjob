@@ -1,13 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Users,
   Briefcase,
   FileText,
   PieChart,
 } from 'lucide-react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
 function AdminDashboard() {
+  const [jobs, setJobs] = useState([]);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/job/getall`, {
+          withCredentials: true, // Include credentials if needed
+        });
+        setJobs(response.data.jobs); // Assuming the response structure has jobs inside data
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
   const styles = {
     main: {
       flex: 1,
@@ -128,7 +148,7 @@ function AdminDashboard() {
     {
       id: 1,
       label: 'Tổng Công Việc',
-      value: 120,
+      value: jobs.length,
       icon: <Briefcase style={styles.statIcon} />,
     },
     {

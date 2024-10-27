@@ -13,6 +13,20 @@ const getAllJobs = async (req, res) => {
   }
 };
 
+const getNumberOfJobs = async (req, res) => {
+  try {
+    const jobCount = await Job.countDocuments({ expired: false });
+    res.status(200).json({
+      success: true,
+      count: jobCount,
+    });
+    console.log(jobCount);
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+
 const postJob = async (req, res) => {
   try {
     const { role } = req.user;
@@ -184,4 +198,4 @@ const getSingleJob = async (req, res) => {
   }
 };
 
-module.exports = { getAllJobs, postJob, getMyJobs, deleteJob, getSingleJob};
+module.exports = { getAllJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs};

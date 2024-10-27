@@ -1,6 +1,8 @@
 // controllers/user/user-controller.js
+const { get } = require("mongoose");
 const User = require("../../models/User");
 const cloudinary = require("../../uploads/cloudinary");
+const fs = require("fs").promises;
 
 // Lấy thông tin người dùng
 const getUserInfo = async (req, res) => {
@@ -16,32 +18,44 @@ const getUserInfo = async (req, res) => {
 // Cập nhật avatar người dùng
 const updateAvatar = async (req, res) => {
   try {
-    const { id } = req.user; // Giả sử người dùng đã đăng nhập và thông tin user có sẵn
-    console.log("avatar:", req.files);
-    
-    // Kiểm tra nếu không có file được tải lên
+    const { id } = req.user; // Get user ID from req.user
+    console.log("Uploaded avatar:", req.files);
+
+    // Check if a file was uploaded
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).json({ message: "Avatar file required!" });
     }
 
     const { avatar } = req.files;
 
-    // Các định dạng file được phép (có thể bao gồm ảnh)
+    // Validate the file format
     const allowedFormats = ["image/png", "image/jpeg", "image/jpg"];
     if (!allowedFormats.includes(avatar.mimetype)) {
       return res.status(400).json({ message: "Invalid file type. Please upload a PNG or JPEG file." });
     }
 
-    // Upload avatar lên Cloudinary
+    // Find the user to get the current avatar's public_id
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    // Upload the new avatar to Cloudinary
     const cloudinaryResponse = await cloudinary.uploader.upload(avatar.tempFilePath);
 
-    // Xử lý lỗi khi upload lên Cloudinary
+    // Handle potential errors during Cloudinary upload
     if (!cloudinaryResponse || cloudinaryResponse.error) {
       console.error("Cloudinary Error:", cloudinaryResponse.error || "Unknown Cloudinary error");
       return res.status(500).json({ message: "Failed to upload avatar to Cloudinary" });
     }
 
-    // Cập nhật avatar trong cơ sở dữ liệu cho user
+    // Delete the old avatar from Cloudinary if it exists
+    if (user.avatar && user.avatar.public_id) {
+      await cloudinary.uploader.destroy(user.avatar.public_id);
+      console.log("Previous avatar deleted from Cloudinary.");
+    }
+
+    // Update user avatar in the database
     const updatedUser = await User.findByIdAndUpdate(
       id,
       {
@@ -50,17 +64,22 @@ const updateAvatar = async (req, res) => {
           url: cloudinaryResponse.secure_url,
         },
       },
-      { new: true } // Trả về user đã được cập nhật
+      { new: true } // Return the updated user
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found!" });
+    // Delete the temporary file after upload
+    try {
+      await fs.unlink(avatar.tempFilePath);
+      console.log("Temporary file deleted successfully.");
+    } catch (err) {
+      console.error("Error deleting temporary file:", err);
     }
 
+    // Respond with the updated avatar information
     res.status(200).json({
       success: true,
       message: "Avatar updated successfully!",
-      user: updatedUser,
+      avatar: updatedUser.avatar,
     });
   } catch (error) {
     console.error("Error in updateAvatar:", error);
@@ -68,5 +87,24 @@ const updateAvatar = async (req, res) => {
   }
 };
 
+const getSingleUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
 
-module.exports = { getUserInfo, updateAvatar };
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(404).json({ success: false, message: `Invalid ID / CastError` });
+  }
+};
+
+module.exports = { getUserInfo, updateAvatar, getSingleUser };
