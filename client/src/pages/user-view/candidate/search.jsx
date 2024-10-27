@@ -21,7 +21,7 @@ function CandidateSearch() {
 
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ backgroundColor: '#76ee00', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ backgroundColor: '#0b6a3c', padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         
         {/* Search Input */}
         <input
