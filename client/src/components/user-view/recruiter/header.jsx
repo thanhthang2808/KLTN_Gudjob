@@ -64,6 +64,9 @@ function RecruiterHeader() {
                                 onClick={() => {
                                     if (item === 'My post') {
                                         handleNavigate('/recruiter/myposts');
+                                    }
+                                    if (item === 'Forum') {
+                                        handleNavigate('/recruiter/forum');
                                     } else {
                                         setDropdownOpen((prev) => (prev === item ? '' : item));
                                     }
@@ -72,7 +75,7 @@ function RecruiterHeader() {
                             >
                                 {item}
                             </button>
-                            {dropdownOpen === item && (
+                            {dropdownOpen === item  && item !== 'Forum' && (
                                 <ul className="absolute left-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg z-10">
                                     {['Submenu 1', 'Submenu 2', 'Submenu 3'].map((submenu) => (
                                         <li key={submenu} className="px-4 py-2 hover:bg-gray-600 transition duration-150">{submenu}</li>

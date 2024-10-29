@@ -20,12 +20,15 @@ import CandidateProfile from "./pages/user-view/candidate/profile";
 import AdminUsers from "./pages/admin-view/users";
 import CandidateNews from "./pages/user-view/candidate/news";
 import RecruiterHome from "./pages/user-view/recruiter/home";
+import HRProfile from "./pages/user-view/recruiter/profile";
 import PostJob from "./pages/user-view/recruiter/postjob";
 import RecruiterLayout from "./components/user-view/recruiter/layout";
 import MyPosts from "./pages/user-view/recruiter/mypost";
 import JobDetails from "./pages/user-view/candidate/jobdetails";
 import Application from "./pages/user-view/candidate/application";
 import MyApplications from "./pages/user-view/candidate/myapplications";
+import CandidateForum from "./pages/user-view/candidate/forum";
+import HRForum from "./pages/user-view/recruiter/forum";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -87,6 +90,7 @@ function App() {
             <Route path="application/:id" element={<Application />} />
             <Route path="myapplications" element={<MyApplications />} />
             <Route path="news" element={<CandidateNews />} />
+            <Route path="forum" element={<CandidateForum />} />
           </Route>
           <Route
             path="/recruiter"
@@ -99,6 +103,8 @@ function App() {
             <Route path="home" element={<RecruiterHome />} />
             <Route path="myposts" element={<MyPosts />} />
             <Route path="postjob" element={<PostJob />} /> 
+            <Route path="profile" element={<HRProfile />} /> 
+            <Route path="forum" element={<HRForum />} /> 
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
