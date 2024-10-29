@@ -52,7 +52,12 @@ function CandidateHeader() {
         if (item === 'My Applications') {
             // Điều hướng đến trang myapplications nếu chọn "My Applications"
             navigate('/candidate/myapplications');
-        } else {
+        } 
+        if (item === 'Forum') {
+            // Điều hướng đến trang myapplications nếu chọn "My Applications"
+            navigate('/candidate/forum');
+        }
+        else {
             // Mở dropdown cho các mục khác
             setDropdownOpen((prev) => (prev === item ? '' : item));
         }
@@ -76,7 +81,7 @@ function CandidateHeader() {
                             >
                                 {item}
                             </button>
-                            {dropdownOpen === item && item !== 'My Applications' && (
+                            {dropdownOpen === item && item !== 'My Applications'&& item !== 'Forum' && (
                                 <ul className="absolute left-0 mt-2 w-40 bg-gray-800 rounded shadow-lg">
                                     <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 1</li>
                                     <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 2</li>

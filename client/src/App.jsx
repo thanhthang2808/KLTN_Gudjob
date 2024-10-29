@@ -26,6 +26,8 @@ import MyPosts from "./pages/user-view/recruiter/mypost";
 import JobDetails from "./pages/user-view/candidate/jobdetails";
 import Application from "./pages/user-view/candidate/application";
 import MyApplications from "./pages/user-view/candidate/myapplications";
+import CandidateForum from "./pages/user-view/candidate/forum";
+import HRForum from "./pages/user-view/recruiter/forum";
 import ApplicationsFromCandidate from "./pages/user-view/recruiter/applications-from-candidate";
 import RecruiterProfile from "./pages/user-view/recruiter/profile";
 function App() {
@@ -89,6 +91,7 @@ function App() {
             <Route path="application/:id" element={<Application />} />
             <Route path="myapplications" element={<MyApplications />} />
             <Route path="news" element={<CandidateNews />} />
+            <Route path="forum" element={<CandidateForum />} />
           </Route>
           <Route
             path="/recruiter"
@@ -102,7 +105,10 @@ function App() {
             <Route path="myposts" element={<MyPosts />} />
             <Route path="profile" element={<RecruiterProfile />} />
             <Route path="postjob" element={<PostJob />} /> 
+            <Route path="forum" element={<HRForum />} /> 
+
             <Route path="candidate-applications" element={<ApplicationsFromCandidate />} />
+
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
