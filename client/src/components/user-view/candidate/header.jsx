@@ -106,7 +106,7 @@ function CandidateHeader() {
 
       {/* User Info and Dropdown */}
       <div
-        className="flex items-center space-x-4 relative"
+        className="flex items-center space-x-4 relative pr-4"
         onMouseEnter={() => setDropdownOpen(true)}
         // onMouseLeave={handleMouseLeave}
       >
@@ -144,27 +144,27 @@ function CandidateHeader() {
             </div>
             {/* Các tùy chọn */}
             <ul className="p-2">
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer" onClick={()=> navigate('/candidate/profile')}>
                 <Settings size={20} />
                 <span>Cài đặt thông tin cá nhân</span>
               </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
                 <Wallet size={20} />
                 <span>Ví của tôi</span>
               </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
                 <FileText size={20} />
                 <span>CV của tôi</span>
               </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
                 <Bell size={20} />
                 <span>Cài đặt thông báo</span>
               </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
                 <Shield size={20} />
                 <span>Cài đặt bảo mật</span>
               </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
+              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
                 <Key size={20} />
                 <span>Đổi mật khẩu</span>
               </li>
