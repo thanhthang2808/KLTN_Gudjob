@@ -4,15 +4,15 @@ import avatarDefault from "@/assets/default-user.png";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
-const HRProfile = () => {
-    const [user, setUser] = useState(null);
+const RecruiterProfile = () => {
+    const [user, setUser] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [editedUser, setEditedUser] = useState({});
-    const [isJobSeeking, setIsJobSeeking] = useState(false);
     const [avatar, setAvatar] = useState(null);
     const [preview, setPreview] = useState(null);
     const [message, setMessage] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false); // State để quản lý modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [candidates, setCandidates] = useState([]);
 
     const getInfo = async () => {
         try {
@@ -21,9 +21,8 @@ const HRProfile = () => {
             });
             setUser(response.data.user);
             setEditedUser(response.data.user);
-            setIsJobSeeking(response.data.user.isJobSeeking || false);
         } catch (error) {
-            console.error("Lỗi khi lấy thông tin người dùng:", error);
+            console.error("Error fetching recruiter info:", error);
         }
     };
 
@@ -33,15 +32,15 @@ const HRProfile = () => {
 
     const saveChanges = async () => {
         try {
-            // await axios.put(`${API_URL}/api/user/update-info`, editedUser, {
-            //     withCredentials: true,
-            // });
-            // setUser(editedUser);
-            // setIsEditing(false);
-            // setMessage('Cập nhật thông tin thành công!');
+            await axios.put(`${API_URL}/api/user/update-info`, editedUser, {
+                withCredentials: true,
+            });
+            setUser(editedUser);
+            setIsEditing(false);
+            setMessage('Profile updated successfully!');
         } catch (error) {
-            console.error("Lỗi khi cập nhật thông tin người dùng:", error);
-            setMessage('Có lỗi xảy ra khi cập nhật thông tin!');
+            console.error("Error updating recruiter info:", error);
+            setMessage('An error occurred while updating your information!');
         }
     };
 
@@ -56,7 +55,7 @@ const HRProfile = () => {
         e.preventDefault();
 
         if (!avatar) {
-            setMessage("Vui lòng chọn một ảnh để tải lên!");
+            setMessage("Please select an image to upload!");
             return;
         }
 
@@ -68,25 +67,31 @@ const HRProfile = () => {
                 `${API_URL}/api/user/update-avatar`,
                 formData,
                 {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
                     withCredentials: true,
                 }
             );
 
-            setUser((prevUser) => ({
-                ...prevUser,
-                avatar: response.data.avatar,
-            }));
-            setMessage('Cập nhật avatar thành công!');
-            setPreview(null);
-            setAvatar(null);
+            if (response.data.avatar) {
+                setUser((prevUser) => ({
+                    ...prevUser,
+                    avatar: response.data.avatar.url,
+                }));
+                setMessage('Avatar updated successfully!');
+                setPreview(null);
+                setAvatar(null);
+            } else {
+                setMessage('An error occurred while updating the avatar!');
+            }
+
+            if (response.data.success) {
+                window.location.reload();
+            }
+
         } catch (error) {
-            console.error("Lỗi khi cập nhật avatar:", error.response ? error.response.data : error.message);
-            setMessage('Có lỗi xảy ra khi cập nhật avatar!');
+            console.error("Error updating avatar:", error);
+            setMessage('An error occurred while updating the avatar!');
         } finally {
-            setIsModalOpen(false); // Đóng modal sau khi cập nhật
+            setIsModalOpen(false);
         }
     };
 
@@ -95,116 +100,82 @@ const HRProfile = () => {
     }, []);
 
     return (
-        <div className="flex flex-col md:flex-row p-5 md:p-10 justify-center">
-            {/* Left side for user information */}
-            <div className="w-full md:w-3/5 bg-white shadow-lg rounded-lg p-6 mr-0 md:mr-10 mb-5 md:mb-0">
-                <h1 className="text-2xl font-bold mb-6">Thông Tin Người Dùng</h1>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Tên</label>
-                        <input
-                            type="text"
-                            value={editedUser.name || ""}
-                            onChange={(e) => handleFieldChange("name", e.target.value)}
-                            className={`w-full border border-gray-300 rounded-md p-2 ${isEditing ? "bg-white" : "bg-gray-100"}`}
-                            onClick={() => setIsEditing(true)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Số Điện Thoại</label>
-                        <input
-                            type="text"
-                            value={editedUser.phone || ""}
-                            onChange={(e) => handleFieldChange("phone", e.target.value)}
-                            className={`w-full border border-gray-300 rounded-md p-2 ${isEditing ? "bg-white" : "bg-gray-100"}`}
-                            onClick={() => setIsEditing(true)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            type="text"
-                            value={editedUser.email || ""}
-                            onChange={(e) => handleFieldChange("email", e.target.value)}
-                            className={`w-full border border-gray-300 rounded-md p-2 ${isEditing ? "bg-white" : "bg-gray-100"}`}
-                            onClick={() => setIsEditing(true)}
-                        />
-                    </div>
+        <div className="flex flex-col md:flex-row p-5 md:p-10 bg-gray-100 min-h-screen">
+            {/* Left side for recruiter information */}
+            <div className="w-full md:w-3/5 bg-white shadow-md rounded-lg p-6 mr-0 md:mr-10 mb-5 md:mb-0 transition-all duration-300 ease-in-out hover:shadow-lg">
+                <h1 className="text-2xl font-bold mb-6 text-gray-800">Recruiter Information</h1>
+                <div className="space-y-6">
+                    {['name', 'phone', 'email'].map((field) => (
+                        <div key={field}>
+                            <label className="block text-sm font-medium text-gray-700 capitalize">{field}</label>
+                            <input
+                                type="text"
+                                value={editedUser[field] || ""}
+                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                className={`w-full border border-gray-300 rounded-md p-2 transition duration-200 focus:border-blue-500 ${isEditing ? "bg-white" : "bg-gray-100"}`}
+                                onClick={() => setIsEditing(true)}
+                            />
+                        </div>
+                    ))}
                     {isEditing && (
                         <button
-                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200"
                             onClick={saveChanges}
                         >
-                            Lưu Thay Đổi
+                            Save Changes
                         </button>
                     )}
-                    {message && <p className="text-red-500">{message}</p>} {/* Thông báo lỗi/success */}
+                    {message && <p className="text-red-500">{message}</p>} {/* Notification for success/error */}
                 </div>
             </div>
 
-            {/* Right side for avatar and job-seeking toggle */}
-            <div className="w-full md:w-1/5 bg-white shadow-lg rounded-lg p-6">
+            {/* Right side for avatar and candidates list */}
+            <div className="w-full md:w-1/3 bg-white shadow-md rounded-lg p-6 transition-all duration-300 ease-in-out hover:shadow-lg">
                 <div className="flex items-center">
                     <img
-                        src={user?.avatar || avatarDefault}
+                        src={user?.avatar?.url || avatarDefault}
                         alt="Avatar"
-                        className="w-24 h-24 rounded-full object-cover mb-4 cursor-pointer"
-                        onClick={() => setIsModalOpen(true)} // Mở modal khi nhấn vào avatar
+                        className="w-32 h-32 rounded-full object-cover mb-4 cursor-pointer shadow-lg border-2 border-blue-500"
+                        onClick={() => setIsModalOpen(true)} // Open modal when clicking on avatar
                     />
-                    <h2 className="text-lg font-semibold ml-4">{user?.name}</h2>
-                </div>
-
-                {/* Toggle switch for job seeking */}
-                {/* <div className="flex items-center mt-2">
-                    <span className="mr-2">Tìm Việc:</span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={isJobSeeking}
-                            onChange={() => setIsJobSeeking(!isJobSeeking)}
-                        />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full shadow-inner"></div>
-                        <div
-                            className={`absolute left-0 w-6 h-6 bg-white rounded-full shadow transition-transform ${
-                                isJobSeeking ? "translate-x-full bg-green-500" : ""
-                            }`}
-                        ></div>
-                    </label>
-                </div> */}
+                    <div className="ml-4">
+                        <h2 className="text-xl font-semibold text-gray-800">{user?.name}</h2>
+                        <h3 className="text-md font-medium text-gray-600">{user?.companyName}</h3>
+                    </div>
+                </div>                
             </div>
 
             {/* Modal for updating avatar */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white rounded-lg p-6 w-80">
-                        <h2 className="text-lg font-bold mb-4">Cập Nhật Avatar</h2>
+                        <h2 className="text-lg font-bold mb-4 text-gray-800">Update Avatar</h2>
                         <form onSubmit={handleAvatarUpdate}>
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleFileChange}
-                                className="mb-4"
+                                className="mb-4 border rounded p-2"
                             />
-                            <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
-                                Cập nhật Avatar
+                            <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200">
+                                Update Avatar
                             </button>
                         </form>
 
                         {preview && (
-                            <div>
-                                <h4>Ảnh Xem Trước:</h4>
-                                <img src={preview} alt="Preview" style={{ width: '100%', height: 'auto' }} />
+                            <div className="mt-4">
+                                <h4 className="text-gray-700">Preview Image:</h4>
+                                <img src={preview} alt="Preview" className="mt-2 w-full h-auto rounded shadow-md" />
                             </div>
                         )}
 
                         {message && <p className="text-red-500">{message}</p>}
 
                         <button 
-                            className="mt-4 text-red-500" 
-                            onClick={() => setIsModalOpen(false)} // Đóng modal
+                            className="mt-4 text-red-500 font-medium" 
+                            onClick={() => setIsModalOpen(false)} // Close modal
                         >
-                            Đóng
+                            Close
                         </button>
                     </div>
                 </div>
@@ -213,4 +184,4 @@ const HRProfile = () => {
     );
 };
 
-export default HRProfile;
+export default RecruiterProfile;

@@ -46,7 +46,7 @@ function RecruiterHeader() {
     };
 
     // Danh sách menu
-    const menuItems = ['Candidate', 'My post', 'Tools', 'Forum'];
+    const menuItems = ['Candidate', 'My post', 'Candidate applications', 'Forum'];
 
     return (
         <header className="flex items-center justify-between max-w-full p-4 bg-gray-900 text-white">
@@ -65,8 +65,10 @@ function RecruiterHeader() {
                                     if (item === 'My post') {
                                         handleNavigate('/recruiter/myposts');
                                     }
-                                    if (item === 'Forum') {
-                                        handleNavigate('/recruiter/forum');
+                                    else if (item === 'Forum') {
+                                        handleNavigate('/recruiter/forum');                
+                                    } else if (item === 'Candidate applications') {
+                                        handleNavigate('/recruiter/candidate-applications');
                                     } else {
                                         setDropdownOpen((prev) => (prev === item ? '' : item));
                                     }

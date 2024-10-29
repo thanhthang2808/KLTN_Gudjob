@@ -1,182 +1,71 @@
-import React, { useEffect, useState} from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import CandidateSearch from "./search";
+import money from "@/assets/money.svg";
+import location from "@/assets/location.svg";
+import experience from "@/assets/experience.svg";
+import time from "@/assets/time.svg";
+import share from "@/assets/share.svg";
+import anhmau from "@/assets/anhmau.png";
+import heartgreen from "@/assets/heartgreen.svg";
+import bell from "@/assets/bell.svg";
+import level from "@/assets/level.svg";
+import numberpeople from "@/assets/numberpeople.svg";
+import job from "@/assets/job.svg";
+import gender from "@/assets/gender.svg";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
-const JobDetails = () => {
+function JobDetails() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [posterInfo, setPosterInfo] = useState(null);
   const [error, setError] = useState(false);
-
   const navigateTo = useNavigate();
 
-  const handleUserClickHome = () => {
-    navigateTo('/candidate/home'); 
-  }
   useEffect(() => {
     axios
-      .get(`${API_URL}/api/job/${id}`, {
-        withCredentials: true,
-      })
+      .get(`${API_URL}/api/job/${id}`, { withCredentials: true })
       .then((res) => {
         setJob(res.data.job);
         setLoading(false);
+
+        if (res.data.job.postedBy) {
+          axios
+            .get(`${API_URL}/api/user/${res.data.job.postedBy}`, {
+              withCredentials: true,
+            })
+            .then((res) => {
+              setPosterInfo(res.data.user);
+            })
+            .catch((error) => {
+              console.error("Error fetching poster info:", error);
+            });
+        }
       })
-      .catch((error) => {
+      .catch(() => {
         setError(true);
         setLoading(false);
         navigateTo("/not-found");
       });
   }, [id, navigateTo]);
 
-  // Định nghĩa các kiểu dáng sử dụng đối tượng JavaScript
-  const styles = {
-    container: {
-      maxWidth: "900px",
-      margin: "50px auto",
-      padding: "30px",
-      background: "linear-gradient(to right, silver , rgba(85, 231, 156, 0.8))",
-      borderRadius: "15px",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-      fontFamily: "'Poppins', sans-serif",
-      color: "rgba(119, 119, 119, 0.8)",
-    },
-    header: {
-      textAlign: "center",
-      marginBottom: "40px",
-    },
-    headerTitle: {
-      fontSize: "2.5rem",
-      fontWeight: "700",
-      textShadow: "2px 2px #000",
-    },
-    banner: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-      backgroundColor: "rgba(2, 11, 0, 0.8)",
-      padding: "20px",
-      borderRadius: "10px",
-    },
-    infoRow: {
-      display: "flex",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-      gap: "15px",
-    },
-    infoItem: {
-      flex: "1 1 45%",
-      backgroundColor: "rgba(0, 0, 0, 0.2)",
-      padding: "15px",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    },
-    label: {
-      fontWeight: "600",
-      fontSize: "1.1rem",
-      color: "#ffeb3b",
-    },
-    value: {
-      fontWeight: "400",
-      fontSize: "1rem",
-      color: "#ffffff",
-    },
-    description: {
-      marginTop: "25px",
-      padding: "15px",
-      backgroundColor: "rgba(0, 0, 0, 0.3)",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-      lineHeight: "1.8",
-      color: "#e0f7fa",
-    },
-    applyButton: {
-      display: "block",
-      width: "180px",
-      padding: "12px 25px",
-      backgroundColor: "#22ff57",
-      color: "#fff",
-      textAlign: "center",
-      border: "none",
-      borderRadius: "30px",
-      textDecoration: "none",
-      fontSize: "1.1rem",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)",
-    },
-    backButton: {
-      display: "block",
-      width: "180px",
-      padding: "12px 25px",
-      backgroundColor: "red",
-      color: "#fff",
-      textAlign: "center",
-      border: "none",
-      borderRadius: "30px",
-      textDecoration: "none",
-      fontSize: "1.1rem",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)",
-    },
-    applyButtonHover: {
-      backgroundColor: "aqua",
-      transform: "translateY(-3px)",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
-    },
-    backButtonHover: {
-      backgroundColor: "#cd3333",
-      transform: "translateY(-3px)",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
-    },
-    loading: {
-      textAlign: "center",
-      fontSize: "1.5rem",
-      color: "#ffeb3b",
-      padding: "50px 0",
-    },
-    error: {
-      textAlign: "center",
-      fontSize: "1.5rem",
-      color: "#ff1744",
-      padding: "50px 0",
-    },
-    // Responsive Design
-    "@media (maxWidth: 600px)": {
-      container: {
-        padding: "20px",
-      },
-      headerTitle: {
-        fontSize: "2rem",
-      },
-      applyButton: {
-        width: "100%",
-      },
-      infoItem: {
-        flex: "1 1 100%",
-      },
-    },
-  };
-
-  // Trạng thái Loading
+  // Loading state
   if (loading) {
     return (
-      <div style={styles.container}>
-        <p style={styles.loading}>Đang tải...</p>
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-yellow-400">Đang tải...</p>
       </div>
     );
   }
 
-  // Trạng thái Lỗi
+  // Error state
   if (error || !job) {
     return (
-      <div style={styles.container}>
-        <p style={styles.error}>
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-red-600">
           Không thể tải chi tiết công việc. Vui lòng thử lại sau.
         </p>
       </div>
@@ -184,82 +73,195 @@ const JobDetails = () => {
   }
 
   return (
-    <section style={styles.container} className="page">
-      <div style={styles.header}>
-        <h3 style={styles.headerTitle}>Chi Tiết Tuyển Dụng</h3>
-      </div>
-      <div style={styles.banner}>
-        <div style={styles.infoRow}>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>📌 Tiêu đề:</span>{" "}
-            <span style={styles.value}>{job.title}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>📂 Danh mục:</span>{" "}
-            <span style={styles.value}>{job.category}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>🌍 Quốc gia:</span>{" "}
-            <span style={styles.value}>{job.country}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>🏙️ Thành phố:</span>{" "}
-            <span style={styles.value}>{job.city}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>📍 Vị trí:</span>{" "}
-            <span style={styles.value}>{job.location}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>📅 Ngày đăng:</span>{" "}
-            <span style={styles.value}>
-              {new Date(job.jobPostedOn).toLocaleDateString()}
-            </span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.label}>💰 Lương:</span>{" "}
-            {job.fixedSalary ? (
-              <span style={styles.value}>
-                {job.fixedSalary.toLocaleString()} VNĐ
+    <div className="flex flex-col h-screen overflow-y-auto">
+      {/* Header */}
+      <CandidateSearch />
+      <div className="flex flex-row h-full w-full justify-center">
+        <div className="flex flex-col flex-6.5 p-5">
+          <div className="bg-white p-5 rounded min-w-full shadow-md">
+            <h1 className="text-3xl font-bold mb-6">{job.title}</h1>
+            <div className="flex justify-between mb-6 space-x-20">
+              {" "}
+              {/* Thêm space-x-4 ở đây */}
+              <div className="flex items-center">
+                <img src={money} alt="Mức lương" className="w-12 h-12 mr-2" />
+                <div>
+                  <h2 className="text-sm">Mức lương</h2>
+                  {job.fixedSalary ? (
+                    <strong className="text-lg">
+                      {job.fixedSalary.toLocaleString()} VNĐ
+                    </strong>
+                  ) : (
+                    <strong className="text-lg">
+                      {job.salaryFrom.toLocaleString()} VNĐ -{" "}
+                      {job.salaryTo.toLocaleString()} VNĐ
+                    </strong>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center">
+                <img src={location} alt="Địa điểm" className="w-12 h-12 mr-2" />
+                <div>
+                  <h2 className="text-sm">Địa điểm</h2>
+                  <strong className="text-lg">{job.city}</strong>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <img
+                  src={experience}
+                  alt="Kinh nghiệm"
+                  className="w-12 h-12 mr-2"
+                />
+                <div>
+                  <h2 className="text-sm">Kinh nghiệm</h2>
+                  <strong className="text-lg">Không yêu cầu kinh nghiệm</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-200 flex items-center p-2 my-4 rounded">
+              <img src={time} alt="time" className="w-6 h-6 mr-2" />
+              <span className="text-gray-700">
+                Ngày đăng: {new Date(job.jobPostedOn).toLocaleDateString()}
               </span>
-            ) : (
-              <span style={styles.value}>
-                {job.salaryFrom.toLocaleString()} VNĐ -{" "}
-                {job.salaryTo.toLocaleString()} VNĐ
-              </span>
-            )}
+            </div>
+            <div className="flex justify-between items-center">
+              <Link
+                to={`/candidate/application/${job._id}`}
+                className="flex items-center justify-center bg-green-500 text-white font-bold py-2 px-4 rounded"
+              >
+                <img src={share} alt="share" className="w-5 h-5 mr-2" />
+                Ứng tuyển ngay
+              </Link>
+              <button className="flex items-center bg-white justify-center border border-green-500 text-green-500 py-2 px-4 rounded">
+                <img src={heartgreen} alt="save" className="w-5 h-5 mr-2" />
+                Lưu tin
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 mt-5 rounded shadow-md">
+            <h2 className="text-xl font-bold mb-4">Chi tiết tin tuyển dụng</h2>
+            <div>
+              <h3 className="text-lg font-semibold">Mô tả công việc</h3>
+              <p>{job.description || "Không có mô tả công việc cho tin này"}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Yêu cầu ứng viên</h3>
+              <p>- Chăm chỉ, cẩn thận</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Quyền lợi</h3>
+              <p>- Hưởng nguyên lương trong thời gian thử việc.</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Địa điểm làm việc</h3>
+              <p>{job.location}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Cách thức ứng tuyển</h3>
+              <p>
+                Sinh viên ứng tuyển bằng cách bấm <strong>Ứng tuyển</strong>{" "}
+                dưới đây
+              </p>
+              <button className="bg-green-500 text-white py-2 px-4 rounded">
+                Ứng tuyển
+              </button>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mt-6">Việc làm liên quan</h3>
+            </div>
           </div>
         </div>
-        <div style={styles.description}>
-          <span style={styles.label}>📝 Mô tả:</span>
-          <p>{job.description}</p>
+
+        <div className="flex flex-col flex-3.5 p-5">
+          <div className="bg-white p-5 rounded shadow-md">
+            <div className="flex items-center mb-4">
+              <img
+                src={posterInfo?.avatar?.url || anhmau}
+                alt="Company Logo"
+                className="w-24 h-24 border-2 border-gray-300 rounded-full"
+              />
+              <h2 className="text-xl font-bold ml-4">
+                {posterInfo?.companyName || "Tên công ty"}
+              </h2>
+            </div>
+            <div className="text-gray-700 mb-2">Quy mô: 10-24 nhân viên</div>
+            <div className="text-gray-700 mb-2">Lĩnh vực: IT</div>
+            <div className="text-gray-700 mb-2">
+              Địa chỉ: {posterInfo?.address || "Địa chỉ công ty"}
+            </div>
+            <Link to="#" className="text-green-500">
+              Xem trang công ty
+            </Link>
+          </div>
+          <div className="bg-white p-5 mt-5 rounded shadow-md">
+            <h2 className="text-xl font-bold">Thông tin chung</h2>
+            <div className="flex items-center my-2">
+              <img src={level} alt="Cấp bậc" className="w-8 h-8 mr-2" />
+              <div>
+                <div className="text-gray-600">Cấp bậc</div>
+                <div className="font-bold">Nhân viên</div>
+              </div>
+            </div>
+            <div className="flex items-center my-2">
+              <img
+                src={experience}
+                alt="Kinh nghiệm"
+                className="w-8 h-8 mr-2"
+              />
+              <div>
+                <div className="text-gray-600">Kinh nghiệm</div>
+                <div className="font-bold">Không yêu cầu kinh nghiệm</div>
+              </div>
+            </div>
+            <div className="flex items-center my-2">
+              <img
+                src={numberpeople}
+                alt="Số lượng tuyển"
+                className="w-8 h-8 mr-2"
+              />
+              <div>
+                <div className="text-gray-600">Số lượng tuyển</div>
+                <div className="font-bold">1 người</div>
+              </div>
+            </div>
+            <div className="flex items-center my-2">
+              <img src={gender} alt="Giới tính" className="w-8 h-8 mr-2" />
+              <div>
+                <div className="text-gray-600">Giới tính</div>
+                <div className="font-bold">Nam/Nữ</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-5 mt-5 rounded shadow-md">
+            <h2 className="text-xl font-bold">Kỹ năng cần có</h2>
+            <div className="flex items-center my-2">
+               <div className="px-2 h-8 mr-2 rounded bg-gray-300">Javascript</div> 
+               <div className="px-2 h-8 mr-2 rounded bg-gray-300">SQL</div>            
+            </div>
+          </div>
+          <div className="bg-white p-5 mt-5 rounded shadow-md">
+            <h2 className="text-xl font-bold">Thông tin khác</h2>
+            <div className="flex items-center my-2">
+              <img src={bell} alt="Thông báo" className="w-8 h-8 mr-2" />
+              <div>
+                <div className="text-gray-600">Ngày đăng</div>
+                <div className="font-bold">12/11/2024</div>
+              </div>
+            </div>
+            <div className="flex items-center my-2">
+              <img src={time} alt="Thời gian" className="w-8 h-8 mr-2" />
+              <div>
+                <div className="text-gray-600">Hạn nộp hồ sơ</div>
+                <div className="font-bold">12/12/2024</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div style={{display:'flex',flexDirection:'row',justifyContent:'space-around'}}>
-        <Link
-            to={`/candidate/application/${job._id}`}
-            style={styles.applyButton}
-            onMouseOver={(e) => {
-              Object.assign(e.currentTarget.style, styles.applyButtonHover);
-            }}
-            onMouseOut={(e) => {
-              Object.assign(e.currentTarget.style, styles.applyButton);
-            }}
-          >
-            🚀 Nộp Hồ Sơ
-          </Link>
-          <button style={styles.backButton}  onMouseOver={(e) => {
-              Object.assign(e.currentTarget.style, styles.backButtonHover);
-            }}
-            onMouseOut={(e) => {
-              Object.assign(e.currentTarget.style, styles.backButton);
-            }} onClick={handleUserClickHome}>
-            ↩ Trở Về
-          </button>
-        </div>
-          
       </div>
-    </section>
+    </div>
   );
-};
+}
 
 export default JobDetails;
