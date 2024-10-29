@@ -48,19 +48,27 @@ function CandidateHeader() {
     navigate("/candidate/home");
   };
 
-  const handleNavigation = (item) => {
-    if (item === "My Applications") {
-      navigate("/candidate/myapplications");
-    } else {
-      setDropdownOpen((prev) => (prev === item ? "" : item));
-    }
-  };
-
   const handleMouseLeave = () => {
     setTimeout(() => {
       setDropdownOpen(false);
     }, 2000);
   };
+  
+  const handleNavigation = (item) => {
+        if (item === 'My Applications') {
+            // Điều hướng đến trang myapplications nếu chọn "My Applications"
+            navigate('/candidate/myapplications');
+        } 
+        if (item === 'Forum') {
+            // Điều hướng đến trang myapplications nếu chọn "My Applications"
+            navigate('/candidate/forum');
+        }
+        else {
+            // Mở dropdown cho các mục khác
+            setDropdownOpen((prev) => (prev === item ? '' : item));
+        }
+    };
+
 
   return (
     <header className="flex items-center justify-between max-w-full p-4 bg-gray-900 text-white shadow-md">
@@ -72,21 +80,29 @@ function CandidateHeader() {
         <img src={logo} alt="Logo" className="w-20 h-auto" />
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-grow mx-10">
-        <ul className="flex space-x-6">
-          {["Jobs", "Company", "My Applications", "Forum"].map((item) => (
-            <li key={item} className="relative group">
-              <button
-                onClick={() => handleNavigation(item)}
-                className="px-4 py-2 hover:bg-gray-700 rounded transition duration-150"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
+            {/* Navigation Menu */}
+            <nav className="flex-grow mx-10">
+                <ul className="flex space-x-6">
+                    {['Jobs', 'Company', 'My Applications', 'Forum'].map((item) => (
+                        <li key={item} className="relative group">
+                            <button
+                                onClick={() => handleNavigation(item)}
+                                className="px-4 py-2 hover:bg-gray-700 rounded transition duration-150"
+                            >
+                                {item}
+                            </button>
+                            {dropdownOpen === item && item !== 'My Applications'&& item !== 'Forum' && (
+                                <ul className="absolute left-0 mt-2 w-40 bg-gray-800 rounded shadow-lg">
+                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 1</li>
+                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 2</li>
+                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 3</li>
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
 
       {/* User Info and Dropdown */}
       <div
