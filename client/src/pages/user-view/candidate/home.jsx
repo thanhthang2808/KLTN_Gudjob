@@ -7,8 +7,9 @@ function CandidateHome() {
     <div className="flex flex-col min-h-screen w-full">
         {/* Header */}
           <CandidateSearch />
+          <h1 className="text-2xl mt-2 text-gray-600 font-semibold ">Gợi ý cho bạn</h1>
           <CandidateJobList/>
-        {/* Main Content */}
+        
         <main className="flex-1 bg-gray-100 p-4">
             <Outlet />
         </main>
