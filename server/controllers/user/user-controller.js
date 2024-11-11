@@ -1,5 +1,4 @@
 // controllers/user/user-controller.js
-const { get } = require("mongoose");
 const User = require("../../models/User");
 const cloudinary = require("../../uploads/cloudinary");
 const fs = require("fs").promises;

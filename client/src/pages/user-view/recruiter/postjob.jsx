@@ -139,28 +139,38 @@ const PostJob = () => {
               required
             >
               <option value="">Select Category</option>
-              <option value="Graphics & Design">Graphics & Design</option>
-              <option value="Mobile App Development">
-                Mobile App Development
+              <option value="Kinh doanh/Bán hàng">Kinh doanh/Bán hàng</option>
+              <option value="Marketing/PR/Quảng cáo">
+                Marketing/PR/Quảng cáo
               </option>
-              <option value="Frontend Web Development">
-                Frontend Web Development
+              <option value="Dịch vụ khách hàng/Vận hành">
+                Dịch vụ khách hàng/Vận hành
               </option>
-              <option value="MERN Stack Development">
-                MERN Stack Development
+              <option value="Nhân sự/Hành chính">Nhân sự/Hành chính</option>
+              <option value="Tài chính/Ngân hàng">Tài chính/Ngân hàng</option>
+              <option value="Công nghệ Thông tin">Công nghệ Thông tin</option>
+              <option value="Bất động sản/Xây dựng">
+                Bất động sản/Xây dựng
               </option>
-              <option value="Account & Finance">Account & Finance</option>
-              <option value="Artificial Intelligence">
-                Artificial Intelligence
+              <option value="Kế toán/Kiểm toán/Thuế">
+                Kế toán/Kiểm toán/Thuế
               </option>
-              <option value="Video Animation">Video Animation</option>
-              <option value="MEAN Stack Development">
-                MEAN Stack Development
+              <option value="Sản xuất">Sản xuất</option>
+              <option value="Giáo dục/Đào tạo">Giáo dục/Đào tạo</option>
+              <option value="Điện/Điện tử/Viễn thông">
+                Điện/Điện tử/Viễn thông
               </option>
-              <option value="MEVN Stack Development">
-                MEVN Stack Development
+              <option value="Logistics">Logistics</option>
+              <option value="Luật">Luật</option>
+              <option value="Dược/Y tế/Sức khỏe">Dược/Y tế/Sức khỏe</option>
+              <option value="Thiết kế">Thiết kế</option>
+              <option value="Nhà hàng/Khách sạn/Du lịch">
+                Nhà hàng/Khách sạn/Du lịch
               </option>
-              <option value="Data Entry Operator">Data Entry Operator</option>
+              <option value="Năng lượng/Môi trường/Nông nghiệp">
+                Năng lượng/Môi trường/Nông nghiệp
+              </option>
+              <option value="Khác">Khác</option>
             </select>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
