@@ -1,23 +1,50 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Briefcase, ChevronDown, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+  Search,
+  MapPin,
+  Briefcase,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function CandidateSearch() {
   const navigate = useNavigate();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [location, setLocation] = useState('Hồ Chí Minh');
-  const [customLocation, setCustomLocation] = useState('');
+  const [location, setLocation] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
-  const categories = ['Kỹ sư phần mềm', 'Nhà phân tích dữ liệu', 'Quản lý sản phẩm', 'Thiết kế', 'Marketing'];
-  const locations = ['Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Khác'];
+  const categories = [
+    "Kinh doanh/Bán hàng",
+    "Marketing/PR/Quảng cáo",
+    "Dịch vụ khách hàng/Vận hành",
+    "Nhân sự/Hành chính",
+    "Tài chính/Ngân hàng",
+    "Công nghệ Thông tin",
+    "Bất động sản/Xây dựng",
+    "Kế toán/Kiểm toán/Thuế",
+    "Sản xuất",
+    "Giáo dục/Đào tạo",
+    "Điện/Điện tử/Viễn thông",
+    "Logistics",
+    "Luật",
+    "Dược/Y tế/Sức khỏe",
+    "Thiết kế",
+    "Nhà hàng/Khách sạn/Du lịch",
+    "Năng lượng/Môi trường/Nông nghiệp",
+    "Khác",
+  ];
+  const locations = ["", "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Khác"];
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter((cat) => cat !== category));
+      setSelectedCategories(
+        selectedCategories.filter((cat) => cat !== category)
+      );
     } else {
       setSelectedCategories([...selectedCategories, category]);
     }
@@ -26,17 +53,20 @@ function CandidateSearch() {
   const handleLocationChange = (event) => {
     const selectedLocation = event.target.value;
     setLocation(selectedLocation);
-    if (selectedLocation === 'Khác') {
-      setCustomLocation('');
+    if (selectedLocation !== "Khác") {
+      setShowLocationDropdown(false); // Đóng dropdown khi chọn location không phải "Khác"
+    }
+    if (selectedLocation === "Khác") {
+      setCustomLocation("");
     }
   };
 
   const handleSearch = () => {
-    navigate('/result', {
+    navigate("/candidate/search-results", {
       state: {
         searchQuery,
         selectedCategories,
-        location: location === 'Khác' ? customLocation : location,
+        location: location === "Khác" ? customLocation : location,
       },
     });
   };
@@ -65,28 +95,45 @@ function CandidateSearch() {
             className="flex items-center bg-white rounded-lg p-2 w-full sm:w-auto text-gray-700"
           >
             <Briefcase className="text-gray-500 mr-2" />
-            <span>{selectedCategories.length > 0 ? `Danh mục nghề (${selectedCategories.length})` : 'Danh mục nghề'}</span>
+            <span>
+              {selectedCategories.length > 0
+                ? `Danh mục nghề (${selectedCategories.length})`
+                : "Danh mục nghề"}
+            </span>
             <ChevronDown className="ml-2" />
           </button>
           {showCategoryDropdown && (
-            <div className="absolute mt-2 left-0 right-0 sm:w-48 bg-white border border-gray-300 rounded-lg shadow-md p-2 z-10">
-              {categories.map((category) => (
-                <label key={category} className="flex items-center cursor-pointer mb-1 text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(category)}
-                    onChange={() => handleCategoryChange(category)}
-                    className="mr-2"
-                  />
-                  {category}
-                </label>
-              ))}
-              <button onClick={() => setSelectedCategories([])} className="text-sm text-white bg-red-500 hover:text-gray-700">
-                Xóa tất cả
-              </button>
-              <button onClick={() => setShowCategoryDropdown(false)} className="text-sm text-white bg-green-500 hover:text-gray-700">
-                Xong
-              </button>
+            <div className="absolute mt-2 left-0 right-0 sm:w-64 bg-white border border-gray-300 rounded-lg shadow-md p-2 z-10 max-h-60 overflow-y-auto flex flex-col-reverse">
+              <div className="space-y-1">
+                <button
+                  onClick={() => setSelectedCategories([])}
+                  className="text-sm text-white bg-red-500 hover:text-gray-700 rounded-lg p-1 mr-2"
+                >
+                  Xóa tất cả
+                </button>
+                <button
+                  onClick={() => setShowCategoryDropdown(false)}
+                  className="text-sm text-white bg-green-500 hover:text-gray-700 rounded-lg p-1"
+                >
+                  Xong
+                </button>
+              </div>
+              <div className="overflow-y-auto">
+                {categories.map((category) => (
+                  <label
+                    key={category}
+                    className="flex items-center cursor-pointer mb-1 text-gray-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => handleCategoryChange(category)}
+                      className="mr-2"
+                    />
+                    {category}
+                  </label>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -100,9 +147,9 @@ function CandidateSearch() {
             className="flex items-center border bg-white rounded-lg p-2 w-full sm:w-auto text-gray-700"
           >
             <MapPin className="text-gray-500 mr-2" />
-            {location === 'Khác' && customLocation
-                ? customLocation
-                : location || 'Hồ Chí Minh'}
+            {location === "Khác" && customLocation
+              ? customLocation
+              : location || "Tất cả"}
             <ChevronDown className="ml-2" />
           </button>
           {showLocationDropdown && (
@@ -118,16 +165,19 @@ function CandidateSearch() {
                   </option>
                 ))}
               </select>
-              {location === 'Khác' && (
+              {location === "Khác" && (
                 <div className="flex items-center gap-2 h-full">
                   <input
-                  type="text"
-                  placeholder="Nhập địa điểm"
-                  value={customLocation}
-                  onChange={(e) => setCustomLocation(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg outline-none text-gray-700"
-                />
-                <ChevronRight className="text-green-500 cursor-pointer h-full border border-gray-300 rounded-lg" onClick={() => setShowLocationDropdown(false)} />
+                    type="text"
+                    placeholder="Nhập địa điểm"
+                    value={customLocation}
+                    onChange={(e) => setCustomLocation(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg outline-none text-gray-700"
+                  />
+                  <ChevronRight
+                    className="text-green-500 cursor-pointer h-full border border-gray-300 rounded-lg"
+                    onClick={() => setShowLocationDropdown(false)}
+                  />
                 </div>
               )}
             </div>

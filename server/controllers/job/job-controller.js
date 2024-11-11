@@ -53,6 +53,7 @@ const getNumberOfJobs = async (req, res) => {
 };
 
 
+
 const postJob = async (req, res) => {
   try {
     const { role } = req.user;
@@ -226,4 +227,48 @@ const getSingleJob = async (req, res) => {
   }
 };
 
-module.exports = { getAllJobs, getAllRecommendJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs };
+const getSearchResults = async (req, res) => {
+  try {
+    const { searchQuery, selectedCategories, location } = req.query;
+
+    // Tạo một đối tượng điều kiện tìm kiếm
+    const searchConditions = {};
+
+    // Kiểm tra và áp dụng điều kiện tìm kiếm theo tiêu đề công việc
+    if (searchQuery && searchQuery.trim()) {
+      searchConditions.title = { $regex: searchQuery, $options: 'i' }; // Tìm kiếm không phân biệt chữ hoa/thường
+    }
+
+    // Kiểm tra và áp dụng điều kiện tìm kiếm theo các danh mục
+    if (selectedCategories && selectedCategories.length > 0) {
+      searchConditions.category = { $in: selectedCategories.split(',') }; // Chuyển đổi chuỗi danh mục thành mảng
+    }
+
+    // Kiểm tra và áp dụng điều kiện tìm kiếm theo địa điểm
+    if (location && location !== 'Khác') {
+      searchConditions.city = location;
+    }
+
+    // Thực hiện tìm kiếm công việc trong cơ sở dữ liệu
+    const jobs = await Job.find(searchConditions);
+
+    res.status(200).json({
+      success: true,
+      message: "Search Results",
+      jobs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+
+
+
+
+
+module.exports = { getAllJobs, getAllRecommendJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs, getSearchResults};

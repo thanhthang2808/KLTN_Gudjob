@@ -31,6 +31,7 @@ import HRForum from "./pages/user-view/recruiter/forum";
 import ApplicationsFromCandidate from "./pages/user-view/recruiter/applications-from-candidate";
 import RecruiterProfile from "./pages/user-view/recruiter/profile";
 import MyWallet from "./pages/user-view/candidate/mywallet";
+import SearchResults from "./pages/user-view/candidate/search-result";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -94,6 +95,7 @@ function App() {
             <Route path="news" element={<CandidateNews />} />
             <Route path="forum" element={<CandidateForum />} />
             <Route path="mywallet" element={<MyWallet />} />
+            <Route path="search-results" element={<SearchResults />} />
           </Route>
           <Route
             path="/recruiter"
