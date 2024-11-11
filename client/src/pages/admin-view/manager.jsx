@@ -1,62 +1,78 @@
 import React from 'react';
-import { Text } from 'lucide-react';
-function AdminManager() {
-  return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '20px' }}>
+import { User, Settings, ClipboardCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-        {/* User Management Section */}
-        <div style={{ textAlign: 'center', width: '30%', border: '1px solid black', borderRadius: '5px', padding: '10px' }}>
-          <Text/>
-          <div style={{ fontSize: '25px', fontWeight: 'bold', marginBottom: '10px' ,borderBottomWidth:'3px',paddingBottom:'20px'}}>
-            Quản lý tài khoản người dùng
+function AdminManager() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Quản lý Admin</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Quản lý tài khoản người dùng */}
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <div className="flex flex-col items-center mb-4">
+            <User className="h-12 w-12 text-blue-500" />
+            <h2 className="text-xl font-semibold text-gray-700 border-b border-gray-200 w-full text-center pb-2">
+              Quản lý tài khoản người dùng
+            </h2>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver'}}>
+          <div className="space-y-4">
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" onClick={() => navigate('/admin/list-users')}>
               Xem danh sách tài khoản người dùng
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Thêm, xóa, sửa tài khoản người dùng
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Khóa tài khoản người dùng
             </button>
           </div>
         </div>
 
-        {/* System Management Section */}
-        <div style={{ textAlign: 'center', width: '30%', border: '1px solid black', borderRadius: '5px', padding: '10px' }}>
-          <Text/>
-          <div style={{ fontSize: '25px', fontWeight: 'bold', marginBottom: '10px',borderBottomWidth:'3px',paddingBottom:'20px' }}>
-            Quản lý hệ thống
+        {/* Quản lý hệ thống */}
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <div className="flex flex-col items-center mb-4">
+            <Settings className="h-12 w-12 text-green-500" />
+            <h2 className="text-xl font-semibold text-gray-700 border-b border-gray-200 w-full text-center pb-2">
+              Quản lý hệ thống
+            </h2>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+          <div className="space-y-4">
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Xem báo cáo thống kê
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Xem báo cáo vi phạm
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Sao lưu dữ liệu
             </button>
           </div>
         </div>
 
-        {/* Post Management Section */}
-        <div style={{ textAlign: 'center', width: '30%', border: '1px solid black', borderRadius: '5px', padding: '10px' }}>
-          <Text/>
-          <div style={{ fontSize: '25px', fontWeight: 'bold', marginBottom: '10px',borderBottomWidth:'3px',paddingBottom:'20px' }}>
-            Quản lý bài đăng
+        {/* Quản lý bài đăng */}
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <div className="flex flex-col items-center mb-4">
+            <ClipboardCheck className="h-12 w-12 text-red-500" />
+            <h2 className="text-xl font-semibold text-gray-700 border-b border-gray-200 w-full text-center pb-2">
+              Quản lý bài đăng
+            </h2>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver'}}>
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate('/admin/approve-post')}
+              className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            >
               Duyệt bài đăng
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button
+            onClick={() => navigate('/admin/post-manager')}
+             className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Xem danh sách bài đăng
             </button>
-            <button style={{ margin: '20px', padding: '10px', width: '80%',height:'60px' ,backgroundColor:'silver' }}>
+            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
               Xóa bài đăng
             </button>
           </div>
@@ -64,6 +80,7 @@ function AdminManager() {
 
       </div>
     </div>
-  )
+  );
 }
+
 export default AdminManager;

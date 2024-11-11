@@ -140,4 +140,46 @@ const getSingleUser = async (req, res) => {
   }
 };
 
-module.exports = { getUserInfo, updateAvatar, getSingleUser, updateCandidateInfo };
+const getListUser = async (req, res) => {
+  try {   
+    
+    const users = await User.find({ role: { $ne: 'Admin' } }).select("-password");
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const lockAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; 
+
+    if (!["locked", "active"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    user.status = status;
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: `User account ${status} successfully`, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to update user account" });
+  }
+}
+
+
+
+
+module.exports = { getUserInfo, updateAvatar, getSingleUser, updateCandidateInfo, getListUser, lockAccount };

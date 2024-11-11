@@ -32,6 +32,11 @@ import ApplicationsFromCandidate from "./pages/user-view/recruiter/applications-
 import RecruiterProfile from "./pages/user-view/recruiter/profile";
 import MyWallet from "./pages/user-view/candidate/mywallet";
 import SearchResults from "./pages/user-view/candidate/search-result";
+import ApprovePosts from "./pages/admin-view/approve-post";
+import PostManagement from "./pages/admin-view/post-manager";
+import PostDetail from "./pages/admin-view/post-detail";
+import UserList from "./pages/admin-view/user-list";
+import UserDetail from "./pages/admin-view/user-detail";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -76,7 +81,12 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="transactions" element={<AdminTransactions />} />
             <Route path="managers" element={<AdminManager />} />
+            <Route path="approve-post" element={<ApprovePosts />} />
+            <Route path="post-manager" element={<PostManagement />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="list-users" element={<UserList />} />
+            <Route path="user-detail/:id" element={<UserDetail />} />
+            <Route path="post/:id" element={<PostDetail />} />
           </Route>
           <Route
             path="/candidate"
