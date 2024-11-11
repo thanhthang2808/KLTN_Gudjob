@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { LucideVote, X } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -12,6 +13,7 @@ const PostJob = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [location, setLocation] = useState("");
+  const [requiredSkills, setRequiredSkills] = useState([]);
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
   const [fixedSalary, setFixedSalary] = useState("");
@@ -36,37 +38,36 @@ const PostJob = () => {
     }
 
     try {
-      const jobData = salaryType === "Fixed Salary"
-        ? {
-            title,
-            description,
-            category,
-            country,
-            city,
-            location,
-            fixedSalary,
-          }
-        : {
-            title,
-            description,
-            category,
-            country,
-            city,
-            location,
-            salaryFrom,
-            salaryTo,
-          };
+      const jobData =
+        salaryType === "Fixed Salary"
+          ? {
+              title,
+              description,
+              requiredSkills,
+              category,
+              country,
+              city,
+              location,
+              fixedSalary,
+            }
+          : {
+              title,
+              description,
+              requiredSkills,
+              category,
+              country,
+              city,
+              location,
+              salaryFrom,
+              salaryTo,
+            };
 
-      const res = await axios.post(
-        `${API_URL}/api/job/post`,
-        jobData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.post(`${API_URL}/api/job/post`, jobData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       // Show success modal
       setShowModal(true);
@@ -86,6 +87,7 @@ const PostJob = () => {
   const resetForm = () => {
     setTitle("");
     setDescription("");
+    setRequiredSkills([]);
     setCategory("");
     setCountry("");
     setCity("");
@@ -96,10 +98,28 @@ const PostJob = () => {
     setSalaryType("default");
   };
 
+  const handleSkillAdd = (e) => {
+    if (e.key === "," && e.target.value.trim() !== "") {
+      e.preventDefault();
+      const skills = e.target.value
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter((skill) => skill); // Tách chuỗi kỹ năng
+      setRequiredSkills((prev) => [...new Set([...prev, ...skills])]); // Thêm kỹ năng mới vào mảng (loại bỏ trùng lặp)
+      e.target.value = ""; // Xóa ô nhập
+    }
+  };
+
+  const handleSkillRemove = (index) => {
+    setRequiredSkills((prev) => prev.filter((_, i) => i !== index)); // Xóa kỹ năng theo chỉ mục
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
-        <h3 className="text-3xl font-bold text-center text-blue-600 mb-6">Post New Job</h3>
+        <h3 className="text-3xl font-bold text-center text-blue-600 mb-6">
+          Post New Job
+        </h3>
         <form onSubmit={handleJobPost}>
           <div className="mb-4">
             <input
@@ -120,14 +140,26 @@ const PostJob = () => {
             >
               <option value="">Select Category</option>
               <option value="Graphics & Design">Graphics & Design</option>
-              <option value="Mobile App Development">Mobile App Development</option>
-              <option value="Frontend Web Development">Frontend Web Development</option>
-              <option value="MERN Stack Development">MERN Stack Development</option>
+              <option value="Mobile App Development">
+                Mobile App Development
+              </option>
+              <option value="Frontend Web Development">
+                Frontend Web Development
+              </option>
+              <option value="MERN Stack Development">
+                MERN Stack Development
+              </option>
               <option value="Account & Finance">Account & Finance</option>
-              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Artificial Intelligence">
+                Artificial Intelligence
+              </option>
               <option value="Video Animation">Video Animation</option>
-              <option value="MEAN Stack Development">MEAN Stack Development</option>
-              <option value="MEVN Stack Development">MEVN Stack Development</option>
+              <option value="MEAN Stack Development">
+                MEAN Stack Development
+              </option>
+              <option value="MEVN Stack Development">
+                MEVN Stack Development
+              </option>
               <option value="Data Entry Operator">Data Entry Operator</option>
             </select>
           </div>
@@ -202,6 +234,28 @@ const PostJob = () => {
                 />
               </div>
             )}
+          </div>
+          <div className="mb-4">
+            <input
+              type="text"
+              onKeyDown={handleSkillAdd} // Xử lý thêm kỹ năng
+              placeholder="Required Skills (Separate by comma)"
+              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="mt-2">
+              {requiredSkills.map((skill, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center bg-blue-200 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded"
+                >
+                  {skill}
+                  <X
+                    className="h-4 w-4 ml-1 cursor-pointer"
+                    onClick={() => handleSkillRemove(index)}
+                  />
+                </span>
+              ))}
+            </div>
           </div>
           <div className="mb-4">
             <textarea

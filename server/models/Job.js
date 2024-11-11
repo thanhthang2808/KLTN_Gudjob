@@ -74,10 +74,18 @@ const jobSchema = new mongoose.Schema({
   },
   requiredSkills: {
     type: [String],
+    default: [],
+  },
+  expiredDate: {
+    type: Date,
   },
   expired: {
     type: Boolean,
-    default: false,
+    default: false
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
   },
   jobPostedOn: {
     type: Date,

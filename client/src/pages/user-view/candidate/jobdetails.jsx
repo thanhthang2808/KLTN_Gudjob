@@ -19,11 +19,27 @@ const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 function JobDetails() {
   const { id } = useParams();
+  const [user, setUser] = useState({});
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [posterInfo, setPosterInfo] = useState(null);
   const [error, setError] = useState(false);
   const navigateTo = useNavigate();
+
+  const getInfo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/user/user-info`, {
+        withCredentials: true,
+      });
+      setUser(response.data.user);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin người dùng:", error);
+    }
+  };
+
+  useEffect(() => {
+    getInfo();
+  }, []);
 
   useEffect(() => {
     axios
@@ -52,7 +68,24 @@ function JobDetails() {
       });
   }, [id, navigateTo]);
 
-  // Loading state
+  const calculateMatchPercentage = (requiredSkills = [], userSkills = []) => {
+    // Ensure both requiredSkills and userSkills are arrays
+    if (!Array.isArray(requiredSkills) || !Array.isArray(userSkills)) return 0;
+
+    if (requiredSkills.length === 0) return 0; // If there are no required skills, return 0%
+
+    // Find how many required skills the user has
+    const matchedSkills = requiredSkills.filter((skill) =>
+      userSkills.includes(skill)
+    );
+
+    // Calculate match percentage
+    const matchPercentage =
+      (matchedSkills.length / requiredSkills.length) * 100;
+
+    return matchPercentage.toFixed(0); // Return percentage as a formatted string
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -236,9 +269,20 @@ function JobDetails() {
           </div>
           <div className="bg-white p-5 mt-5 rounded shadow-md">
             <h2 className="text-xl font-bold">Kỹ năng cần có</h2>
+            <h3 className="text-sm text-gray-500 font-bold">
+              Độ phù hợp{" "}
+              {calculateMatchPercentage(job.requiredSkills, user.skills)}%
+            </h3>
             <div className="flex items-center my-2">
-               <div className="px-2 h-8 mr-2 rounded bg-gray-300">Javascript</div> 
-               <div className="px-2 h-8 mr-2 rounded bg-gray-300">SQL</div>            
+              {job.requiredSkills &&
+                job.requiredSkills.map((skill, index) => (
+                  <div
+                    key={index}
+                    className="px-2 h-8 mr-2 rounded bg-gray-300"
+                  >
+                    {skill}
+                  </div>
+                ))}
             </div>
           </div>
           <div className="bg-white p-5 mt-5 rounded shadow-md">

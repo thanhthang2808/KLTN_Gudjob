@@ -1,4 +1,4 @@
-
+const User = require("../../models/User");
 const Job = require("../../models/Job");
 
 const getAllJobs = async (req, res) => {
@@ -9,6 +9,32 @@ const getAllJobs = async (req, res) => {
       jobs,
     });
   } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+//Recommend Jobs
+const getAllRecommendJobs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    console.log("userId", user);
+    const userSkills = user.skills; // Giả định 'skills' là mảng kỹ năng của người dùng
+
+    // Tìm các công việc có kỹ năng yêu cầu trùng với kỹ năng của người dùng
+    const jobs = await Job.find({
+      expired: false,
+      requiredSkills: { $in: userSkills },
+    });
+
+    res.status(200).json({
+      success: true,
+      jobs,
+    });
+    } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -40,6 +66,7 @@ const postJob = async (req, res) => {
     const {
       title,
       description,
+      requiredSkills,
       category,
       country,
       city,
@@ -49,7 +76,7 @@ const postJob = async (req, res) => {
       salaryTo,
     } = req.body;
 
-    if (!title || !description || !category || !country || !city || !location) {
+    if (!title || !description || !requiredSkills || !category || !country || !city || !location) {
       return res.status(400).json({
         success: false,
         message: "Please provide full job details.",
@@ -74,6 +101,7 @@ const postJob = async (req, res) => {
     const job = await Job.create({
       title,
       description,
+      requiredSkills,
       category,
       country,
       city,
@@ -198,4 +226,4 @@ const getSingleJob = async (req, res) => {
   }
 };
 
-module.exports = { getAllJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs};
+module.exports = { getAllJobs, getAllRecommendJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs };

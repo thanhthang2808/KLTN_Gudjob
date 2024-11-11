@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  phone: {
+    type: String,
+    unique: true,
+  },
   password: {
     type: String,
     required: true,
@@ -35,6 +39,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  walletBalance: {
+    type: Number,
+    default: 0,
+  },
   // Thông tin bổ sung cho Recruiter
   companyName: {
     type: String,
@@ -57,6 +65,10 @@ const userSchema = new mongoose.Schema({
   // Thông tin bổ sung cho Candidate
   skills: {
     type: [String], // Mảng chứa các kỹ năng
+    required: function () {
+      return this.role === "Candidate";
+    },
+    default: [],
   },
   experience: {
     type: String, // Mô tả kinh nghiệm làm việc

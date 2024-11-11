@@ -30,6 +30,7 @@ import CandidateForum from "./pages/user-view/candidate/forum";
 import HRForum from "./pages/user-view/recruiter/forum";
 import ApplicationsFromCandidate from "./pages/user-view/recruiter/applications-from-candidate";
 import RecruiterProfile from "./pages/user-view/recruiter/profile";
+import MyWallet from "./pages/user-view/candidate/mywallet";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -42,7 +43,7 @@ function App() {
   ;
 
   return (
-    <div className="flex flex-col max-h-screen w-screen">
+    <div className="flex flex-col max-h-screen w-screen overflow-x-hidden">
       
 
       {/* Main Content */}
@@ -92,6 +93,7 @@ function App() {
             <Route path="myapplications" element={<MyApplications />} />
             <Route path="news" element={<CandidateNews />} />
             <Route path="forum" element={<CandidateForum />} />
+            <Route path="mywallet" element={<MyWallet />} />
           </Route>
           <Route
             path="/recruiter"
@@ -117,9 +119,9 @@ function App() {
       </main>
 
       {/* Footer (Optional) */}
-      {/* <footer className="bg-gray-800 text-white p-4 w-full">
-          <p className="text-center">© 2024 Your Company. All rights reserved.</p>
-        </footer> */}
+      <footer className="bg-gray-800 text-white p-4 w-full">
+          <p className="text-center">© 2024 Gudjob Vietnam. All rights reserved.</p>
+        </footer>
     </div>
   );
 }
