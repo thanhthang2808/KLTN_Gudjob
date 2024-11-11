@@ -73,6 +73,14 @@ const userSchema = new mongoose.Schema({
   experience: {
     type: String, // Mô tả kinh nghiệm làm việc
   },
+  status: {
+    type: String,
+    enum: ["active", "locked"],
+    default: "active",
+    required: function () {
+      return this.role !== "Admin"; // Only required for non-admin users
+    },
+  },
 });
 
 const User = mongoose.model("User", userSchema);

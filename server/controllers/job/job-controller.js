@@ -19,7 +19,9 @@ const getAllRecommendJobs = async (req, res) => {
     const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     console.log("userId", user);
     const userSkills = user.skills; // Giả định 'skills' là mảng kỹ năng của người dùng
@@ -34,7 +36,7 @@ const getAllRecommendJobs = async (req, res) => {
       success: true,
       jobs,
     });
-    } catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -51,8 +53,20 @@ const getNumberOfJobs = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
-
+const getPendingJobs = async (req, res) => {
+  try {
+    const pendingJobs = await Job.find({ status: "Pending" });
+    res.status(200).json({ success: true, jobs: pendingJobs });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to retrieve pending jobs",
+        error,
+      });
+  }
+};
 
 const postJob = async (req, res) => {
   try {
@@ -63,7 +77,7 @@ const postJob = async (req, res) => {
         message: "Candidate not allowed to access this resource.",
       });
     }
-    
+
     const {
       title,
       description,
@@ -77,7 +91,15 @@ const postJob = async (req, res) => {
       salaryTo,
     } = req.body;
 
-    if (!title || !description || !requiredSkills || !category || !country || !city || !location) {
+    if (
+      !title ||
+      !description ||
+      !requiredSkills ||
+      !category ||
+      !country ||
+      !city ||
+      !location
+    ) {
       return res.status(400).json({
         success: false,
         message: "Please provide full job details.",
@@ -226,6 +248,38 @@ const getSingleJob = async (req, res) => {
     res.status(404).json({ success: false, message: `Invalid ID / CastError` });
   }
 };
+const updateJobStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // Expect "Approved" or "Rejected" in the request body
+
+  if (!["Approved", "Rejected"].includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status" });
+  }
+
+  try {
+    const job = await Job.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } // Return the updated document
+    );
+
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: `Job ${status.toLowerCase()} successfully`,
+        job,
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update job status", error });
+  }
+};
 
 const getSearchResults = async (req, res) => {
   try {
@@ -236,16 +290,16 @@ const getSearchResults = async (req, res) => {
 
     // Kiểm tra và áp dụng điều kiện tìm kiếm theo tiêu đề công việc
     if (searchQuery && searchQuery.trim()) {
-      searchConditions.title = { $regex: searchQuery, $options: 'i' }; // Tìm kiếm không phân biệt chữ hoa/thường
+      searchConditions.title = { $regex: searchQuery, $options: "i" }; // Tìm kiếm không phân biệt chữ hoa/thường
     }
 
     // Kiểm tra và áp dụng điều kiện tìm kiếm theo các danh mục
     if (selectedCategories && selectedCategories.length > 0) {
-      searchConditions.category = { $in: selectedCategories.split(',') }; // Chuyển đổi chuỗi danh mục thành mảng
+      searchConditions.category = { $in: selectedCategories.split(",") }; // Chuyển đổi chuỗi danh mục thành mảng
     }
 
     // Kiểm tra và áp dụng điều kiện tìm kiếm theo địa điểm
-    if (location && location !== 'Khác') {
+    if (location && location !== "Khác") {
       searchConditions.city = location;
     }
 
@@ -266,9 +320,15 @@ const getSearchResults = async (req, res) => {
   }
 };
 
-
-
-
-
-
-module.exports = { getAllJobs, getAllRecommendJobs, postJob, getMyJobs, deleteJob, getSingleJob, getNumberOfJobs, getSearchResults};
+module.exports = {
+  getAllJobs,
+  getAllRecommendJobs,
+  postJob,
+  getMyJobs,
+  deleteJob,
+  getSingleJob,
+  getNumberOfJobs,
+  getSearchResults,
+  getPendingJobs,
+  updateJobStatus,
+};

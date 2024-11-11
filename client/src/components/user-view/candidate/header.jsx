@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/store/auth-slice";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import logo from "@/assets/logo-placeholder.png";
+import logo from "@/assets/logo-gudjob.jpg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -43,7 +43,7 @@ function CandidateHeader() {
     amount ? `${parseInt(amount).toLocaleString("vi-VN")} VNĐ` : "0 VNĐ";
 
   return (
-    <header className="flex items-center justify-between p-2 bg-gray-900 text-white shadow-md fixed w-full z-50">
+    <header className="flex items-center justify-between p-2 bg-[#00072D] text-white shadow-md fixed w-full z-50">
       {/* Sidebar Icon for Mobile */}
       <div className="md:hidden flex items-center">
         <Menu

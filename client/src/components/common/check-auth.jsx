@@ -38,7 +38,15 @@ function CheckAuth({ isAuthenticated, user, children }) {
   if (
     isAuthenticated &&
     user?.role === "Admin" &&
-    location.pathname.includes("user")
+    location.pathname.includes("candidate") 
+  ) {
+    return <Navigate to="/admin/dashboard" />;
+  }
+
+  if (
+    isAuthenticated &&
+    user?.role === "Admin" &&
+    location.pathname.includes("recruiter") 
   ) {
     return <Navigate to="/admin/dashboard" />;
   }
