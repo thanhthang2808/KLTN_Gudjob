@@ -1,5 +1,4 @@
-import { LogOut, User } from "lucide-react";
-import { Button } from "../../ui/button";
+import { LogOut, Settings, Wallet, Menu } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/store/auth-slice";
 import { toast } from "@/hooks/use-toast";
@@ -7,12 +6,29 @@ import { useState, useEffect } from "react";
 import logo from "@/assets/logo-placeholder.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Settings, Wallet, FileText, Bell, Shield, Key } from "lucide-react"; // Thêm icon cần thiết
 
 function CandidateHeader() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const getInfo = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/user/user-info`,
+          { withCredentials: true }
+        );
+        setUserInfo(response.data.user);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    getInfo();
+  }, []);
 
   const handleLogout = () => {
     dispatch(logoutUser()).then((data) => {
@@ -23,162 +39,120 @@ function CandidateHeader() {
     });
   };
 
-  const [userInfo, setUserInfo] = useState(null);
-  const getInfo = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/user/user-info`,
-        {
-          withCredentials: true,
-        }
-      );
-      setUserInfo(response.data.user);
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-    }
-  };
-
-  useEffect(() => {
-    getInfo();
-  }, []);
-
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const handleUserClickHome = () => {
-    navigate("/candidate/home");
-  };
-
-  const handleMouseLeave = () => {
-    setTimeout(() => {
-      setDropdownOpen(false);
-    }, 2000);
-  };
-  
-  const handleNavigation = (item) => {
-        if (item === 'My Applications') {
-            // Điều hướng đến trang myapplications nếu chọn "My Applications"
-            navigate('/candidate/myapplications');
-        } 
-        if (item === 'Forum') {
-            // Điều hướng đến trang myapplications nếu chọn "My Applications"
-            navigate('/candidate/forum');
-        }
-        else {
-            // Mở dropdown cho các mục khác
-            setDropdownOpen((prev) => (prev === item ? '' : item));
-        }
-    };
-
+  const formatAmount = (amount) =>
+    amount ? `${parseInt(amount).toLocaleString("vi-VN")} VNĐ` : "0 VNĐ";
 
   return (
-    <header className="flex items-center justify-between max-w-full p-4 bg-gray-900 text-white shadow-md">
-      {/* Logo */}
-      <div
-        className="flex items-center cursor-pointer"
-        onClick={handleUserClickHome}
-      >
-        <img src={logo} alt="Logo" className="w-20 h-auto" />
+    <header className="flex items-center justify-between p-2 bg-gray-900 text-white shadow-md fixed w-full z-50">
+      {/* Sidebar Icon for Mobile */}
+      <div className="md:hidden flex items-center">
+        <Menu
+          size={24}
+          className="cursor-pointer"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        />
       </div>
 
-            {/* Navigation Menu */}
-            <nav className="flex-grow mx-10">
-                <ul className="flex space-x-6">
-                    {['Jobs', 'Company', 'My Applications', 'Forum'].map((item) => (
-                        <li key={item} className="relative group">
-                            <button
-                                onClick={() => handleNavigation(item)}
-                                className="px-4 py-2 hover:bg-gray-700 rounded transition duration-150"
-                            >
-                                {item}
-                            </button>
-                            {dropdownOpen === item && item !== 'My Applications'&& item !== 'Forum' && (
-                                <ul className="absolute left-0 mt-2 w-40 bg-gray-800 rounded shadow-lg">
-                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 1</li>
-                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 2</li>
-                                    <li className="px-4 py-2 hover:bg-gray-700 transition duration-150">Submenu 3</li>
-                                </ul>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-
-
-      {/* User Info and Dropdown */}
+      {/* Logo Centered on Mobile */}
       <div
-        className="flex items-center space-x-4 relative pr-4"
-        onMouseEnter={() => setDropdownOpen(true)}
-        // onMouseLeave={handleMouseLeave}
+        onClick={() => navigate("/candidate/home")}
+        className="cursor-pointer flex items-center justify-center flex-grow md:flex-grow-0"
       >
-        <div className="flex items-center cursor-pointer">
-          <img
-            src={userInfo?.avatar?.url || "/default-avatar.png"}
-            alt="Avatar"
-            className="w-9 h-9 rounded-full mr-3"
-          />
-          <span className="text-lg font-medium">
-            {userInfo?.name || "User"}
-          </span>
-        </div>
-        {dropdownOpen && (
-          <div
-            className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
-            onMouseEnter={() => setDropdownOpen(true)}
-            onMouseLeave={() => setDropdownOpen(false)}
+        <img src={logo} alt="Logo" className="w-16 h-auto" />
+      </div>
+
+      {/* Navigation Menu for Desktop */}
+      <nav className="hidden md:flex space-x-4">
+        {["Jobs", "Company", "My Applications", "Forum"].map((item) => (
+          <button
+            key={item}
+            onClick={() => navigate(`/candidate/${item.toLowerCase().replace(" ", "")}`)}
+            className="text-sm px-3 py-1 hover:bg-gray-800 rounded"
           >
-            {/* Thông tin người dùng */}
-            <div className="flex items-center text-gray-800 p-4 border-b border-gray-300 bg-gray-100">
+            {item}
+          </button>
+        ))}
+      </nav>
+
+      {/* User Avatar on Right */}
+      <div className="relative flex items-center md:space-x-2">
+        <img
+          src={userInfo?.avatar?.url || "/default-avatar.png"}
+          alt="User Avatar"
+          className="w-8 h-8 rounded-full cursor-pointer"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        />
+        {dropdownOpen && (
+          <div className="absolute right-0 top-12 w-56 bg-white text-gray-800 rounded-lg shadow-lg z-50">
+            <div className="flex items-center p-3 border-b">
               <img
                 src={userInfo?.avatar?.url || "/default-avatar.png"}
                 alt="Avatar"
-                className="w-12 h-12 rounded-full mr-3"
+                className="w-10 h-10 rounded-full mr-3"
               />
               <div>
-                <h2 className="text-md font-semibold">
+                <h2 className="text-sm font-semibold">
                   {userInfo?.name || "User"}
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-500">
                   {userInfo?.email || "user@example.com"}
                 </p>
               </div>
             </div>
-            {/* Các tùy chọn */}
-            <ul className="p-2">
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer" onClick={()=> navigate('/candidate/profile')}>
-                <Settings size={20} />
-                <span>Cài đặt thông tin cá nhân</span>
-              </li>
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
-                <Wallet size={20} />
-                <span>Ví của tôi</span>
-              </li>
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
-                <FileText size={20} />
-                <span>CV của tôi</span>
-              </li>
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
-                <Bell size={20} />
-                <span>Cài đặt thông báo</span>
-              </li>
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
-                <Shield size={20} />
-                <span>Cài đặt bảo mật</span>
-              </li>
-              <li className="flex items-center text-gray-600 gap-2 p-2 hover:bg-gray-200 transition duration-150 cursor-pointer">
-                <Key size={20} />
-                <span>Đổi mật khẩu</span>
+            <ul className="text-sm">
+              <li
+                className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
+                onClick={() => navigate("/candidate/profile")}
+              >
+                <Settings size={16} /> Cài đặt thông tin cá nhân
               </li>
               <li
-                className="flex items-center gap-2 p-2 hover:bg-red-200 transition duration-150 cursor-pointer text-red-600"
+                className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
+                onClick={() => navigate("/candidate/mywallet")}
+              >
+                <Wallet size={16} /> Ví của tôi{" "}
+                <span className="text-green-600">
+                  {formatAmount(userInfo?.walletBalance)}
+                </span>
+              </li>
+              <li
+                className="p-2 hover:bg-red-100 text-red-600 flex items-center gap-2 cursor-pointer"
                 onClick={handleLogout}
               >
-                <LogOut size={20} />
-                <span>Đăng xuất</span>
+                <LogOut size={16} /> Đăng xuất
               </li>
             </ul>
           </div>
         )}
       </div>
+
+      {/* Sidebar Menu for Mobile */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden">
+          <div className="absolute left-0 top-0 h-full w-64 bg-white shadow-lg p-4">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="text-gray-600 mb-4"
+            >
+              Close
+            </button>
+            <nav className="flex flex-col space-y-2">
+              {["Jobs", "Company", "My Applications", "Forum"].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    navigate(`/candidate/${item.toLowerCase().replace(" ", "")}`);
+                    setSidebarOpen(false);
+                  }}
+                  className="text-sm px-3 py-2 hover:bg-gray-200 rounded"
+                >
+                  {item}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

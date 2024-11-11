@@ -8,6 +8,10 @@ const authRoutes = require("./routes/auth/auth-routes");
 const userRoutes = require("./routes/user/user-routes");
 const jobRoutes = require("./routes/job/job-routes");
 const applicationRoutes = require("./routes/job/application-routes");
+const walletRoutes = require("./routes/user/wallet-routes");
+
+
+const { paymentHandler } = require("./controllers/payment/payment");
 
 dotenv.config();
 
@@ -48,5 +52,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/job", jobRoutes);
 app.use("/api/application", applicationRoutes);
+app.use("/api/wallet", walletRoutes);
+
+
+app.post("/payment", paymentHandler)
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

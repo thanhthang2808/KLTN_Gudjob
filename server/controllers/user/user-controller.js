@@ -87,6 +87,40 @@ const updateAvatar = async (req, res) => {
   }
 };
 
+const updateCandidateInfo = async (req, res) => {
+  try {
+    const { id } = req.user; // Lấy ID người dùng từ req.user
+    const { name, email, phone, skills } = req.body; // Nhận thông tin từ yêu cầu
+
+    // Tạo một đối tượng để lưu thông tin cập nhật
+    const updatedData = {};
+    if (name) updatedData.name = name;
+    if (email) updatedData.email = email;
+    if (phone) updatedData.phone = phone;
+    if (skills) updatedData.skills = skills;
+
+    // Cập nhật thông tin người dùng
+    const updatedUser = await User.findByIdAndUpdate(id, updatedData, { new: true });
+    console.log("UpdatedUser:", updatedUser);
+    
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found!" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User information updated successfully!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in updateInfo:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+
 const getSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -107,4 +141,4 @@ const getSingleUser = async (req, res) => {
   }
 };
 
-module.exports = { getUserInfo, updateAvatar, getSingleUser };
+module.exports = { getUserInfo, updateAvatar, getSingleUser, updateCandidateInfo };
