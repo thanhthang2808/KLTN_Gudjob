@@ -14,10 +14,12 @@ function SearchResults() {
     searchQuery,
     selectedCategories,
     location: locationQuery,
+    workType,
   } = location.state || {
     searchQuery: "",
     selectedCategories: [],
     location: "",
+    workType: "",
   };
   const [jobs, setJobs] = useState([]);
   const [avatars, setAvatars] = useState({});
@@ -51,6 +53,7 @@ function SearchResults() {
               searchQuery,
               selectedCategories: selectedCategories.join(","),
               location: locationQuery,
+              workType
             },
             withCredentials: true, // Ensure that cookies/authorization are sent
           }

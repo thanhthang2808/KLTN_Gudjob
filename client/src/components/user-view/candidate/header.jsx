@@ -1,4 +1,16 @@
-import { LogOut, Settings, Wallet, Menu } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  Wallet,
+  Menu,
+  ChevronDown,
+  Search,
+  FileText,
+  Bookmark,
+  Home,
+  Bell,
+  MessageCircle,
+} from "lucide-react"; // Added icons for dropdown items
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/store/auth-slice";
 import { toast } from "@/hooks/use-toast";
@@ -14,6 +26,7 @@ function CandidateHeader() {
   const [userInfo, setUserInfo] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [jobsDropdownOpen, setJobsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const getInfo = async () => {
@@ -63,24 +76,114 @@ function CandidateHeader() {
 
       {/* Navigation Menu for Desktop */}
       <nav className="hidden md:flex space-x-4">
-        {["Jobs", "Company", "My Applications", "Forum"].map((item) => (
-          <button
-            key={item}
-            onClick={() => navigate(`/candidate/${item.toLowerCase().replace(" ", "")}`)}
-            className="text-sm px-3 py-1 hover:bg-gray-800 rounded"
+        <div
+          className="relative"
+          onMouseEnter={() => setJobsDropdownOpen(true)}
+          onMouseLeave={() => setJobsDropdownOpen(false)}
+        >
+          <div
+            className="font-bold hover:text-green-500 text-sm px-3 h-full py-4 hover:bg-gray-800 rounded flex items-center cursor-pointer"
+            onClick={() =>
+              navigate("/candidate/search-results", {
+                state: {
+                  searchQuery: "",
+                  selectedCategories: [],
+                  location: "",
+                },
+              })
+            }
           >
-            {item}
-          </button>
-        ))}
+            Việc làm
+          </div>
+          {jobsDropdownOpen && (
+            <div className="absolute bg-white text-gray-800 rounded-lg shadow-lg z-50  w-72">
+              <ul className="text-sm">
+                <li
+                  className="p-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2 rounded-lg"
+                  onClick={() =>
+                    navigate("/candidate/search-results", {
+                      state: {
+                        searchQuery: "",
+                        selectedCategories: [],
+                        location: "",
+                      },
+                    })
+                  }
+                >
+                  <Search size={16} /> Tìm việc
+                </li>
+                <li
+                  className="p-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2 rounded-lg"
+                  onClick={() => navigate("/candidate/myapplications")}
+                >
+                  <FileText size={16} /> Việc làm đã ứng tuyển
+                </li>
+                <li
+                  className="p-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2 rounded-lg"
+                  onClick={() => navigate("/candidate/savedjobs")}
+                >
+                  <Bookmark size={16} /> Việc làm đã lưu
+                </li>
+                <li
+                  className="p-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2 rounded-lg"
+                  onClick={() => navigate("/candidate/companies")}
+                >
+                  <Home size={16} /> Danh sách công ty
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
+        {/* <div className="flex items-center">
+          <div className="h-10 border-l border-gray-100 hidden sm:block"></div>
+        </div> */}
+
+        <div
+          onClick={() => navigate("/candidate/update-cv")}
+          className="font-bold hover:text-green-500 text-sm px-3 h-full py-4 hover:bg-gray-800 rounded flex items-center cursor-pointer"
+        >
+          Hồ sơ của tôi
+        </div>
+        <div className="font-bold hover:text-green-500 text-sm px-3 h-full py-4 hover:bg-gray-800 rounded flex items-center cursor-pointer">
+          Công cụ
+        </div>
+        <div
+          onClick={() => navigate("/candidate/forum")}
+          className="font-bold hover:text-green-500 text-sm px-3 h-full py-4 hover:bg-gray-800 rounded flex items-center cursor-pointer"
+        >
+          Diễn đàn
+        </div>
       </nav>
 
       {/* User Avatar on Right */}
-      <div className="relative flex items-center md:space-x-2">
+      <div className="relative flex items-center md:space-x-4 p-2">
+        {/* Notification Button */}
+        <div className="relative cursor-pointer">
+          <Bell size={24} className="text-gray-500 hover:text-gray-800" />
+          <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+            3 {/* Example notification count */}
+          </span>
+        </div>
+
+        {/* Messaging Button */}
+        <div className="relative cursor-pointer">
+          <MessageCircle
+            size={24}
+            className="text-gray-500 hover:text-gray-800"
+          />
+          <span className="absolute top-0 right-0 h-4 w-4 bg-blue-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+            5 {/* Example message count */}
+          </span>
+        </div>
+
+        {/* User Avatar */}
+        <div className="flex items-center cursor-pointer py-2" onMouseEnter={() => setDropdownOpen(true)}
+          onMouseLeave={() => setDropdownOpen(false)}>
         <img
           src={userInfo?.avatar?.url || "/default-avatar.png"}
           alt="User Avatar"
           className="w-8 h-8 rounded-full cursor-pointer"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          
         />
         {dropdownOpen && (
           <div className="absolute right-0 top-12 w-56 bg-white text-gray-800 rounded-lg shadow-lg z-50">
@@ -92,7 +195,7 @@ function CandidateHeader() {
               />
               <div>
                 <h2 className="text-sm font-semibold">
-                  {userInfo?.name || "User"}
+                  {userInfo?.name || "Người dùng"}
                 </h2>
                 <p className="text-xs text-gray-500">
                   {userInfo?.email || "user@example.com"}
@@ -124,6 +227,7 @@ function CandidateHeader() {
             </ul>
           </div>
         )}
+        </div>
       </div>
 
       {/* Sidebar Menu for Mobile */}
@@ -137,18 +241,22 @@ function CandidateHeader() {
               Close
             </button>
             <nav className="flex flex-col space-y-2">
-              {["Jobs", "Company", "My Applications", "Forum"].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    navigate(`/candidate/${item.toLowerCase().replace(" ", "")}`);
-                    setSidebarOpen(false);
-                  }}
-                  className="text-sm px-3 py-2 hover:bg-gray-200 rounded"
-                >
-                  {item}
-                </button>
-              ))}
+              {["Việc làm", "Công ty", "Đơn ứng tuyển", "Diễn đàn"].map(
+                (item) => (
+                  <button
+                    key={item}
+                    onClick={() => {
+                      navigate(
+                        `/candidate/${item.toLowerCase().replace(" ", "")}`
+                      );
+                      setSidebarOpen(false);
+                    }}
+                    className="text-sm px-3 py-2 hover:bg-gray-200 rounded"
+                  >
+                    {item}
+                  </button>
+                )
+              )}
             </nav>
           </div>
         </div>

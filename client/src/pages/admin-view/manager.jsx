@@ -20,13 +20,7 @@ function AdminManager() {
           </div>
           <div className="space-y-4">
             <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" onClick={() => navigate('/admin/list-users')}>
-              Xem danh sách tài khoản người dùng
-            </button>
-            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-              Thêm, xóa, sửa tài khoản người dùng
-            </button>
-            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-              Khóa tài khoản người dùng
+              Quản lý danh sách tài khoản người dùng
             </button>
           </div>
         </div>
@@ -70,10 +64,7 @@ function AdminManager() {
             <button
             onClick={() => navigate('/admin/post-manager')}
              className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-              Xem danh sách bài đăng
-            </button>
-            <button className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-              Xóa bài đăng
+              Quản lý danh sách bài đăng
             </button>
           </div>
         </div>

@@ -37,6 +37,7 @@ import PostManagement from "./pages/admin-view/post-manager";
 import PostDetail from "./pages/admin-view/post-detail";
 import UserList from "./pages/admin-view/user-list";
 import UserDetail from "./pages/admin-view/user-detail";
+import UpdateCV from "./pages/user-view/candidate/updatecv";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -106,6 +107,7 @@ function App() {
             <Route path="forum" element={<CandidateForum />} />
             <Route path="mywallet" element={<MyWallet />} />
             <Route path="search-results" element={<SearchResults />} />
+            <Route path="update-cv" element={<UpdateCV />} />
           </Route>
           <Route
             path="/recruiter"
