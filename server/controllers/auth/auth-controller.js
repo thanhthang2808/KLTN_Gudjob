@@ -47,6 +47,9 @@ const loginUser = async (req, res) => {
     if (!checkPasswordMatch)
       return res.json({ success: false, message: "Incorrect password!" });
 
+    if (checkUser.status === "locked")
+      return res.json({ success: false, message: "User is locked!" });
+
     const token = jwt.sign(
       {
         id: checkUser._id,

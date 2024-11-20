@@ -71,7 +71,18 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   experience: {
-    type: String, // Mô tả kinh nghiệm làm việc
+    type: [String], // Mô tả kinh nghiệm làm việc
+    required: function () {
+      return this.role === "Candidate";
+    },
+    default: [],
+  },
+  education: {
+    type: [String], // Mô tả quá trình học vấn
+    required: function () {
+      return this.role === "Candidate";
+    },
+    default: [],
   },
   status: {
     type: String,

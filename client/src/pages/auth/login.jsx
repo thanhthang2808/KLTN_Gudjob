@@ -11,17 +11,21 @@ const initialState = {
   password: "",
 };
 function AuthLogin() {
-
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const { toast } = useToast();
 
   function onSubmit(event) {
     event.preventDefault();
-    dispatch(loginUser(formData)).then((data) => { 
-      if(data?.payload?.success) {
+    dispatch(loginUser(formData)).then((data) => {
+      if (data?.payload?.success) {
         toast({
           title: data?.payload?.message,
+        });
+      } else if (data?.payload?.message === "User is locked!") {
+        toast({
+          title: "Tài khoản của bạn đã bị khóa, vui lòng liên hệ với quản trị viên!",
+          variant: "destructive",
         });
       } else {
         toast({
@@ -49,11 +53,11 @@ function AuthLogin() {
         </p>
       </div>
       <CommonForm
-      formControls={loginFormControls}
-      buttonText={'Sign in'}
-      formData={formData}
-      setFormData={setFormData}
-      onSubmit={onSubmit}
+        formControls={loginFormControls}
+        buttonText={"Sign in"}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={onSubmit}
       />
     </div>
   );

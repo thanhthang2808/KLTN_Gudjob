@@ -23,12 +23,12 @@ const getAllRecommendJobs = async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-    console.log("userId", user);
     const userSkills = user.skills; // Giả định 'skills' là mảng kỹ năng của người dùng
 
     // Tìm các công việc có kỹ năng yêu cầu trùng với kỹ năng của người dùng
     const jobs = await Job.find({
       expired: false,
+      status: "Approved",
       requiredSkills: { $in: userSkills },
     });
 
@@ -43,7 +43,7 @@ const getAllRecommendJobs = async (req, res) => {
 
 const getNumberOfJobs = async (req, res) => {
   try {
-    const jobCount = await Job.countDocuments({ expired: false });
+    const jobCount = await Job.countDocuments({ expired: false, status: "Approved" });
     res.status(200).json({
       success: true,
       count: jobCount,
@@ -283,7 +283,7 @@ const updateJobStatus = async (req, res) => {
 
 const getSearchResults = async (req, res) => {
   try {
-    const { searchQuery, selectedCategories, location } = req.query;
+    const { searchQuery, selectedCategories, location, workType } = req.query;
 
     // Tạo một đối tượng điều kiện tìm kiếm
     const searchConditions = {};
@@ -302,6 +302,10 @@ const getSearchResults = async (req, res) => {
     if (location && location !== "Khác") {
       searchConditions.city = location;
     }
+    searchConditions.workType = workType;
+
+    searchConditions.expired = false;
+    searchConditions.status = "Approved";
 
     // Thực hiện tìm kiếm công việc trong cơ sở dữ liệu
     const jobs = await Job.find(searchConditions);

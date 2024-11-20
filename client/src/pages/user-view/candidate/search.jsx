@@ -17,6 +17,8 @@ function CandidateSearch() {
   const [customLocation, setCustomLocation] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showWorkTypeDropdown, setShowWorkTypeDropdown] = useState(false);
+  const [workType, setWorkType] = useState("");
 
   const categories = [
     "Kinh doanh/Bán hàng",
@@ -39,6 +41,7 @@ function CandidateSearch() {
     "Khác",
   ];
   const locations = ["", "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Khác"];
+  const workTypes = ["Dài hạn", "Ngắn hạn"];
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {
@@ -54,7 +57,7 @@ function CandidateSearch() {
     const selectedLocation = event.target.value;
     setLocation(selectedLocation);
     if (selectedLocation !== "Khác") {
-      setShowLocationDropdown(false); // Đóng dropdown khi chọn location không phải "Khác"
+      setShowLocationDropdown(false);
     }
     if (selectedLocation === "Khác") {
       setCustomLocation("");
@@ -67,6 +70,7 @@ function CandidateSearch() {
         searchQuery,
         selectedCategories,
         location: location === "Khác" ? customLocation : location,
+        workType,
       },
     });
   };
@@ -103,22 +107,22 @@ function CandidateSearch() {
             <ChevronDown className="ml-2" />
           </button>
           {showCategoryDropdown && (
-            <div className="absolute mt-2 left-0 right-0 sm:w-64 bg-white border border-gray-300 rounded-lg shadow-md p-2 z-10 max-h-60 overflow-y-auto flex flex-col-reverse">
+            <div className="absolute mt-2 left-0 right-0 sm:w-64 bg-white border border-gray-300 rounded-lg shadow-md p-2 z-10 max-h-60 overflow-y-auto">
               <div className="space-y-1">
                 <button
                   onClick={() => setSelectedCategories([])}
-                  className="text-sm text-white bg-red-500 hover:text-gray-700 rounded-lg p-1 mr-2"
+                  className="text-sm text-white bg-red-500 hover:bg-gray-700 rounded-lg p-1 mr-2"
                 >
                   Xóa tất cả
                 </button>
                 <button
                   onClick={() => setShowCategoryDropdown(false)}
-                  className="text-sm text-white bg-green-500 hover:text-gray-700 rounded-lg p-1"
+                  className="text-sm text-white bg-green-500 hover:bg-gray-700 rounded-lg p-1"
                 >
                   Xong
                 </button>
               </div>
-              <div className="overflow-y-auto">
+              <div>
                 {categories.map((category) => (
                   <label
                     key={category}
@@ -166,7 +170,7 @@ function CandidateSearch() {
                 ))}
               </select>
               {location === "Khác" && (
-                <div className="flex items-center gap-2 h-full">
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
                     placeholder="Nhập địa điểm"
@@ -175,11 +179,40 @@ function CandidateSearch() {
                     className="w-full p-2 border border-gray-300 rounded-lg outline-none text-gray-700"
                   />
                   <ChevronRight
-                    className="text-green-500 cursor-pointer h-full border border-gray-300 rounded-lg"
+                    className="text-green-500 cursor-pointer"
                     onClick={() => setShowLocationDropdown(false)}
                   />
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        <div className="h-10 border-l border-gray-300 mx-2 hidden sm:block"></div>
+
+        {/* WorkType Dropdown */}
+        <div className="relative w-full sm:w-auto">
+          <button
+            onClick={() => setShowWorkTypeDropdown((prev) => !prev)}
+            className="flex items-center bg-white rounded-lg p-2 w-full sm:w-auto text-gray-700"
+          >
+            <span>{workType || "Loại công việc"}</span>
+            <ChevronDown className="ml-2" />
+          </button>
+          {showWorkTypeDropdown && (
+            <div className="absolute mt-2 left-0 right-0 sm:w-48 bg-white border border-gray-300 rounded-lg shadow-md p-2 z-10">
+              {workTypes.map((type) => (
+                <div
+                  key={type}
+                  onClick={() => {
+                    setWorkType(type);
+                    setShowWorkTypeDropdown(false);
+                  }}
+                  className="p-2 hover:bg-gray-200 cursor-pointer rounded"
+                >
+                  {type}
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -11,7 +11,7 @@ function BannerSlider() {
     },
     {
       imageUrl:
-        "https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%201.png",
+        "https://images.careerviet.vn/employers/9053/164840banner.png",
       altText: "Second Banner",
     },
     {
