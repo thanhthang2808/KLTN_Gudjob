@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import anhmau from "@/assets/anhmau.png";
 import heart from "@/assets/heart.svg";
-import { Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import CandidateSearch from "./search";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
@@ -175,6 +175,11 @@ function SearchResults() {
                   className="w-8 h-8 mt-4 cursor-pointer"
                 />
               </div>
+              {job.workType === "Tự do" && (
+              <div className="absolute bottom-1 right-1 bg-green-400 text-xs px-1 py-1 rounded-lg">
+                <text className="text-white">Việc làm Freelance</text>
+              </div>
+            )}
             </div>
           </div>
         ))

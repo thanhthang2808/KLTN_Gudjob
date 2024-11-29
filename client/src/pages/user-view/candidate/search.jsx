@@ -41,7 +41,7 @@ function CandidateSearch() {
     "Khác",
   ];
   const locations = ["", "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Khác"];
-  const workTypes = ["Dài hạn", "Ngắn hạn"];
+  const workTypes = ["Dài hạn", "Ngắn hạn", "Tự do", "Thực tập"];
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {

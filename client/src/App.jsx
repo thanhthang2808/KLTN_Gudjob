@@ -38,25 +38,28 @@ import PostDetail from "./pages/admin-view/post-detail";
 import UserList from "./pages/admin-view/user-list";
 import UserDetail from "./pages/admin-view/user-detail";
 import UpdateCV from "./pages/user-view/candidate/updatecv";
+import RecruiterJobDetails from "./pages/user-view/recruiter/jobdetails";
+import ConversationPage from "./pages/user-view/conversation";
 function App() {
-  const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, isLoading } = useSelector(
+    (state) => state.auth
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  if (isLoading) return <Skeleton className="w-full h-full" />
-  ;
+  if (isLoading) return <Skeleton className="w-full h-full" />;
+
+  const shouldShowFooter = !location.pathname.includes("conversation");
 
   return (
     <div className="flex flex-col max-h-screen w-screen overflow-x-hidden">
-      
-
       {/* Main Content */}
       <main className="flex flex-1 w-full">
         <Routes>
-        <Route path="/" element={<Navigate to="/auth/login" />} />
+          <Route path="/" element={<Navigate to="/auth/login" />} />
           {/* Auth Layout */}
           <Route
             path="/auth"
@@ -120,11 +123,24 @@ function App() {
             <Route path="home" element={<RecruiterHome />} />
             <Route path="myposts" element={<MyPosts />} />
             <Route path="profile" element={<RecruiterProfile />} />
-            <Route path="postjob" element={<PostJob />} /> 
-            <Route path="forum" element={<HRForum />} /> 
-
-            <Route path="candidate-applications" element={<ApplicationsFromCandidate />} />
-
+            <Route path="postjob" element={<PostJob />} />
+            <Route path="forum" element={<HRForum />} />
+            <Route path="job/:id" element={<RecruiterJobDetails />} />
+            <Route
+              path="candidate-applications"
+              element={<ApplicationsFromCandidate />}
+            />
+          </Route>
+          <Route
+            path="/conversation"
+            element={
+              <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                <ConversationPage />
+              </CheckAuth>
+            }
+          >
+            <Route path=":conversationId" element={<ConversationPage />} />
+            <Route path="" element={<ConversationPage />} />
           </Route>
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
@@ -133,9 +149,13 @@ function App() {
       </main>
 
       {/* Footer (Optional) */}
-      <footer className="bg-gray-800 text-white p-4 w-full">
-          <p className="text-center">© 2024 Gudjob Vietnam. All rights reserved.</p>
+      {shouldShowFooter && (
+        <footer className="bg-gray-800 text-white p-4 w-full">
+          <p className="text-center">
+            © 2024 Gudjob Vietnam. All rights reserved.
+          </p>
         </footer>
+      )}
     </div>
   );
 }

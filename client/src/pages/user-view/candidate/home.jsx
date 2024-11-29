@@ -4,7 +4,7 @@ import CandidateSearch from './search';
 import CandidateJobList from './joblist';
 import BannerSlider from '@/components/user-view/candidate/banner-slider';
 
-import welcomeBg from '@/assets/welcome-bg.jpg';
+import welcomeBg from '@/assets/bg.jpg';
 
 function CandidateHome() {
   return (

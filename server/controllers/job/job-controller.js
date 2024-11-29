@@ -80,31 +80,42 @@ const postJob = async (req, res) => {
 
     const {
       title,
+      vacancies,
+      gender,
       description,
       requiredSkills,
       category,
+      workType,
+      level,
+      experience,
       country,
       city,
       location,
       fixedSalary,
       salaryFrom,
       salaryTo,
+      applicationDeadline,
     } = req.body;
 
-    if (
-      !title ||
-      !description ||
-      !requiredSkills ||
-      !category ||
-      !country ||
-      !city ||
-      !location
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide full job details.",
-      });
-    }
+    // if (
+    //   !title ||
+    //   !vacancies ||
+    //   !gender ||
+    //   !description ||
+    //   !requiredSkills ||
+    //   !category ||
+    //   !workType ||
+    //   !level ||
+    //   !experience ||
+    //   !country ||
+    //   !city ||
+    //   !location
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Please provide full job details.",
+    //   });
+    // }
 
     if ((!salaryFrom || !salaryTo) && !fixedSalary) {
       return res.status(400).json({
@@ -123,15 +134,21 @@ const postJob = async (req, res) => {
     const postedBy = req.user.id;
     const job = await Job.create({
       title,
+      vacancies,
+      gender,
       description,
       requiredSkills,
       category,
+      workType,
+      level,
+      experience,
       country,
       city,
       location,
       fixedSalary,
       salaryFrom,
       salaryTo,
+      applicationDeadline,
       postedBy,
     });
 

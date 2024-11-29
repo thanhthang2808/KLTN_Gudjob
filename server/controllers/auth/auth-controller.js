@@ -1,32 +1,47 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/User");
+const Wallet = require("../../models/Wallet");
 //register
 const registerUser = async (req, res) => {
   const { name, email, avatar, password, role, companyName, address } = req.body;
 
   try {
+    // Kiểm tra email đã tồn tại
     const checkUser = await User.findOne({ email });
     if (checkUser) {
       return res.json({ success: false, message: "Email already exists" });
     }
 
+    // Hash mật khẩu
     const hashPassword = await bcrypt.hash(password, 12);
 
-    // Tạo đối tượng người dùng mới với các trường bổ sung
+    // Tạo đối tượng người dùng mới
     const newUser = new User({
       name,
       email,
       avatar,
       password: hashPassword,
       role,
-      ...(role === "Recruiter" && { companyName, address }), // Thêm trường companyName và address nếu là Recruiter
+      ...(role === "Recruiter" && { companyName, address }), // Thêm trường cho Recruiter
     });
 
-    await newUser.save();
-    res.status(200).json({ success: true, message: "Registration successful" });
-  } catch (e) {
-    console.log(e);
+    // Lưu người dùng vào database
+    const savedUser = await newUser.save();
+
+    // Tạo ví tự động cho người dùng
+    const newWallet = new Wallet({
+      userId: savedUser._id,
+    });
+
+    await newWallet.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Registration successful",
+    });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: "Some error occurred" });
   }
 };
@@ -57,7 +72,7 @@ const loginUser = async (req, res) => {
         email: checkUser.email,
       },
       "CLIENT_SECRET_KEY",
-      { expiresIn: "10h" }
+      { expiresIn: "24h" }
     );
 
     res.cookie("token", token, { httpOnly: true, secure: false }).json({

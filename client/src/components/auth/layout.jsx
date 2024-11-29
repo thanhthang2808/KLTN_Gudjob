@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import backgroundImage from "@/assets/welcome-bg.jpg"; // Thay đổi đường dẫn cho phù hợp
+import backgroundImage from "@/assets/bg.jpg"; // Thay đổi đường dẫn cho phù hợp
 
 function AuthLayout() {
   return (

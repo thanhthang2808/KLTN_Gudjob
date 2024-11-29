@@ -1,3 +1,4 @@
+// 9704 0000 0000 0018 NGUYEN VAN A 03/07 OTP
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Wallet, ArrowUpCircle } from "lucide-react"; // Import icons
@@ -8,6 +9,8 @@ const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 function MyWallet() {
   const [user, setUser] = useState({});
+  const [wallet, setWallet] = useState({});
+  const [transactions, setTransactions] = useState([]); // Lưu lịch sử giao dịch
   const [amount, setAmount] = useState(); // State for deposit amount
   const [showDeposit, setShowDeposit] = useState(false); // State for showing deposit input
   const [showModal, setShowModal] = useState(false); // State for showing the payment modal
@@ -24,6 +27,18 @@ function MyWallet() {
     }
   };
 
+  const getWallet = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/wallet/get-user-wallet`, {
+        withCredentials: true,
+      });
+      setWallet(response.data.wallet);
+      setTransactions(response.data.wallet.transactions); // Lưu giao dịch từ ví
+    } catch (error) {
+      console.error("Error fetching wallet info:", error);
+    }
+  };
+
   const formatAmount = (amount) => {
     if (!amount) return "0 VNĐ"; // Handle case for empty or undefined amount
     return parseInt(amount).toLocaleString("vi-VN") + " VNĐ"; // Formats the number
@@ -31,6 +46,7 @@ function MyWallet() {
 
   useEffect(() => {
     getInfo();
+    getWallet();
   }, []);
 
   const handleDeposit = async () => {
@@ -79,7 +95,7 @@ function MyWallet() {
           <Wallet className="inline-block mr-2 text-blue-600" />
           Số dư:{" "}
           <span className="text-green-600">
-            {formatAmount(user?.walletBalance)}
+            {formatAmount(wallet.balance)}
           </span>
         </h1>
 
@@ -111,6 +127,38 @@ function MyWallet() {
             </button>
           </div>
         )}
+
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-4">Lịch sử giao dịch</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 text-left">Ngày</th>
+                  <th className="px-4 py-2 text-left">Loại giao dịch</th>
+                  <th className="px-4 py-2 text-left">Số tiền</th>
+                  <th className="px-4 py-2 text-left">Mô tả</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.length > 0 ? (
+                  transactions.map((transaction, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="px-4 py-2">{new Date(transaction.date).toLocaleString()}</td>
+                      <td className="px-4 py-2 capitalize">{transaction.type}</td>
+                      <td className="px-4 py-2">{formatAmount(transaction.amount)}</td>
+                      <td className="px-4 py-2">{transaction.description}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-2 text-center">Không có giao dịch nào</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {showModal && (
           <div className="fixed inset-0 flex items-start justify-center bg-black bg-opacity-75 z-50 pt-20">

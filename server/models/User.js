@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Wallet = require("./Wallet");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -39,11 +40,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  walletBalance: {
-    type: Number,
-    default: 0,
-  },
-  // Thông tin bổ sung cho Recruiter
   companyName: {
     type: String,
     required: function () {

@@ -190,6 +190,37 @@ const candidateDeleteApplication = async (req, res) => {
       return res.status(500).json({ message: "Failed to reject application", error: error.message });
     }
   };
+
+const getApplicationsForAJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const applications = await Application.find({ jobID: id });
+    res.status(200).json({
+      success: true,
+      applications,
+    });
+  } catch (error) {
+    console.error("Error in getApplicationsForAJob:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+const checkJobAppliedForCandidate = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const applications = await Application.find({ jobID: id, "applicantID.user": req.user.id });
+    if (applications.length > 0) {
+      return res.status(200).json({ success: true, message: "Job already applied!" });
+    } else {
+      return res.status(200).json({ success: false, message: "Job not applied!" });
+    }
+  } catch (error) {
+    console.error("Error in checkJobApplicatedForCandidate:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
   
 
-module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication };
+  
+
+module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication, getApplicationsForAJob, checkJobAppliedForCandidate };

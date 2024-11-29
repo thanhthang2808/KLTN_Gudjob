@@ -14,6 +14,7 @@ import level from "@/assets/level.svg";
 import numberpeople from "@/assets/numberpeople.svg";
 import job from "@/assets/job.svg";
 import gender from "@/assets/gender.svg";
+import { Check } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -24,6 +25,7 @@ function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [posterInfo, setPosterInfo] = useState(null);
   const [error, setError] = useState(false);
+  const [applied, setApplied] = useState(false);
   const navigateTo = useNavigate();
 
   const getInfo = async () => {
@@ -40,6 +42,21 @@ function JobDetails() {
   useEffect(() => {
     getInfo();
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/api/application/candidate/check-job-applied/${id}`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        if (res.data.success === true) {
+          setApplied(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking if job is applied:", error);
+      });
+  }, [id]);
 
   useEffect(() => {
     axios
@@ -112,7 +129,8 @@ function JobDetails() {
       <div className="flex flex-row h-full w-full justify-center">
         <div className="flex flex-col flex-6.5 p-5">
           <div className="bg-white p-5 rounded min-w-full shadow-md">
-            <h1 className="text-3xl font-bold mb-6">{job.title}</h1>
+            <h1 className="text-3xl font-bold">{job.title}</h1>
+            <h2 className="text-sm text-gray-500 mb-6">{job.category}</h2>
             <div className="flex justify-between mb-6 space-x-20">
               {" "}
               {/* Thêm space-x-4 ở đây */}
@@ -147,7 +165,7 @@ function JobDetails() {
                 />
                 <div>
                   <h2 className="text-sm">Kinh nghiệm</h2>
-                  <strong className="text-lg">Không yêu cầu kinh nghiệm</strong>
+                  <strong className="text-lg">{job.experience}</strong>
                 </div>
               </div>
             </div>
@@ -155,17 +173,25 @@ function JobDetails() {
             <div className="bg-gray-200 flex items-center p-2 my-4 rounded">
               <img src={time} alt="time" className="w-6 h-6 mr-2" />
               <span className="text-gray-700">
-                Ngày đăng: {new Date(job.jobPostedOn).toLocaleDateString()}
+                Hạn nộp hồ sơ:{" "}
+                {new Date(job.applicationDeadline).toLocaleDateString()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <Link
-                to={`/candidate/application/${job._id}`}
-                className="flex items-center justify-center bg-green-500 text-white font-bold py-2 px-4 rounded"
-              >
-                <img src={share} alt="share" className="w-5 h-5 mr-2" />
-                Ứng tuyển ngay
-              </Link>
+              {applied ? (
+                <div className="flex items-center bg-gray-100 justify-center text-green-500 font-bold py-2 px-4 rounded">
+                  Đã ứng tuyển
+                  <Check className="ml-2" size={24} />
+                </div>
+              ) : (
+                <Link
+                  to={`/candidate/application/${job._id}`}
+                  className="flex items-center justify-center bg-green-500 text-white font-bold py-2 px-4 rounded"
+                >
+                  <img src={share} alt="share" className="w-5 h-5 mr-2" />
+                  Ứng tuyển ngay
+                </Link>
+              )}
               <button className="flex items-center bg-white justify-center border border-green-500 text-green-500 py-2 px-4 rounded">
                 <img src={heartgreen} alt="save" className="w-5 h-5 mr-2" />
                 Lưu tin
@@ -174,30 +200,36 @@ function JobDetails() {
           </div>
 
           <div className="bg-white p-5 mt-5 rounded shadow-md">
-            <h2 className="text-xl font-bold mb-4">Chi tiết tin tuyển dụng</h2>
+            <h2 className="text-xl font-bold mb-2">Chi tiết tin tuyển dụng</h2>
             <div>
               <h3 className="text-lg font-semibold">Mô tả công việc</h3>
               <p>{job.description || "Không có mô tả công việc cho tin này"}</p>
             </div>
-            <div>
+            {/* <div>
               <h3 className="text-lg font-semibold">Yêu cầu ứng viên</h3>
               <p>- Chăm chỉ, cẩn thận</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold">Quyền lợi</h3>
               <p>- Hưởng nguyên lương trong thời gian thử việc.</p>
-            </div>
+            </div> */}
             <div>
-              <h3 className="text-lg font-semibold">Địa điểm làm việc</h3>
+              <h3 className="text-lg font-semibold mt-2">Địa điểm làm việc</h3>
               <p>{job.location}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold">Cách thức ứng tuyển</h3>
+              <h3 className="text-lg font-semibold mt-2">Hình thức làm việc</h3>
+              <p>{job.workType}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mt-2">
+                Cách thức ứng tuyển
+              </h3>
               <p>
                 Sinh viên ứng tuyển bằng cách bấm <strong>Ứng tuyển</strong>{" "}
                 dưới đây
               </p>
-              <button className="bg-green-500 text-white py-2 px-4 rounded">
+              <button className="bg-green-500 text-white py-2 px-4 rounded mt-4">
                 Ứng tuyển
               </button>
             </div>
@@ -234,7 +266,7 @@ function JobDetails() {
               <img src={level} alt="Cấp bậc" className="w-8 h-8 mr-2" />
               <div>
                 <div className="text-gray-600">Cấp bậc</div>
-                <div className="font-bold">Nhân viên</div>
+                <div className="font-bold">{job.level}</div>
               </div>
             </div>
             <div className="flex items-center my-2">
@@ -245,7 +277,7 @@ function JobDetails() {
               />
               <div>
                 <div className="text-gray-600">Kinh nghiệm</div>
-                <div className="font-bold">Không yêu cầu kinh nghiệm</div>
+                <div className="font-bold">{job.experience}</div>
               </div>
             </div>
             <div className="flex items-center my-2">
@@ -256,14 +288,14 @@ function JobDetails() {
               />
               <div>
                 <div className="text-gray-600">Số lượng tuyển</div>
-                <div className="font-bold">1 người</div>
+                <div className="font-bold">{job.vacancies}</div>
               </div>
             </div>
             <div className="flex items-center my-2">
               <img src={gender} alt="Giới tính" className="w-8 h-8 mr-2" />
               <div>
                 <div className="text-gray-600">Giới tính</div>
-                <div className="font-bold">Nam/Nữ</div>
+                <div className="font-bold">{job.gender}</div>
               </div>
             </div>
           </div>
@@ -291,14 +323,18 @@ function JobDetails() {
               <img src={bell} alt="Thông báo" className="w-8 h-8 mr-2" />
               <div>
                 <div className="text-gray-600">Ngày đăng</div>
-                <div className="font-bold">12/11/2024</div>
+                <div className="font-bold">
+                  {new Date(job.jobPostedOn).toLocaleDateString()}
+                </div>
               </div>
             </div>
             <div className="flex items-center my-2">
               <img src={time} alt="Thời gian" className="w-8 h-8 mr-2" />
               <div>
                 <div className="text-gray-600">Hạn nộp hồ sơ</div>
-                <div className="font-bold">12/12/2024</div>
+                <div className="font-bold">
+                  {new Date(job.applicationDeadline).toLocaleDateString()}
+                </div>
               </div>
             </div>
           </div>
