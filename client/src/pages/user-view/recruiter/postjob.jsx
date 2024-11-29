@@ -8,8 +8,14 @@ const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 const PostJob = () => {
   const [title, setTitle] = useState("");
+  const [vacancies, setVacancies] = useState();
+  const [gender, setGender] = useState("Tất cả");
   const [description, setDescription] = useState("");
+  const [applicationDeadline, setApplicationDeadline] = useState();
   const [category, setCategory] = useState("");
+  const [workType, setWorkType] = useState("Dài hạn");
+  const [level, setLevel] = useState("Thực tập sinh");
+  const [experience, setExperience] = useState("Không yêu cầu kinh nghiệm");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [location, setLocation] = useState("");
@@ -42,24 +48,36 @@ const PostJob = () => {
         salaryType === "Fixed Salary"
           ? {
               title,
+              vacancies,
+              gender,
               description,
               requiredSkills,
               category,
+              workType,
+              level,
+              experience,
               country,
               city,
               location,
               fixedSalary,
+              applicationDeadline,
             }
           : {
               title,
+              vacancies,
+              gender,
               description,
               requiredSkills,
               category,
+              workType,
+              level,
+              experience,
               country,
               city,
               location,
               salaryFrom,
               salaryTo,
+              applicationDeadline,
             };
 
       const res = await axios.post(`${API_URL}/api/job/post`, jobData, {
@@ -79,16 +97,21 @@ const PostJob = () => {
       // Reset fields after successful submission
       resetForm();
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data.message || "Có lỗi xảy ra!");
       toast.error(err.response?.data.message || "Có lỗi xảy ra!");
     }
   };
 
   const resetForm = () => {
     setTitle("");
+    setVacancies("");
+    setGender("");
     setDescription("");
     setRequiredSkills([]);
     setCategory("");
+    setWorkType("");
+    setLevel("");
+    setExperience("");
     setCountry("");
     setCity("");
     setLocation("");
@@ -96,6 +119,7 @@ const PostJob = () => {
     setSalaryTo("");
     setFixedSalary("");
     setSalaryType("default");
+    setApplicationDeadline("");
   };
 
   const handleSkillAdd = (e) => {
@@ -116,23 +140,81 @@ const PostJob = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
+      <div className="bg-white shadow-lg rounded-lg p-8 max-w-4xl w-full">
         <h3 className="text-3xl font-bold text-center text-blue-600 mb-6">
           Post New Job
         </h3>
-        <form onSubmit={handleJobPost}>
-          <div className="mb-4">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Job Title"
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+        <form onSubmit={handleJobPost} className="space-y-6">
+          {/* Job Title */}
+          <div className="grid grid-cols-6 gap-4">
+            {/* Job Title */}
+            <div className="col-span-4">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Job Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter Job Title"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Vacancies */}
+            <div className="col-span-1">
+              <label
+                htmlFor="vacancies"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Vacancies
+              </label>
+              <input
+                type="number"
+                id="vacancies"
+                value={vacancies}
+                onChange={(e) => setVacancies(e.target.value)}
+                placeholder="Enter Number of Vacancies"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="1"
+                required
+              />
+            </div>
+            <div className="col-span-1">
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Tất cả">Tất cả</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
           </div>
-          <div className="mb-4">
+
+          {/* Category */}
+          <div>
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Category
+            </label>
             <select
+              id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -173,36 +255,136 @@ const PostJob = () => {
               <option value="Khác">Khác</option>
             </select>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              placeholder="Country"
-              className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="City"
-              className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+            {/* Work Type, Level & Experience  */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Work Type
+              </label>
+              <select
+                id="workType"
+                value={workType}
+                onChange={(e) => setWorkType(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="Dài hạn">Dài hạn</option>
+                <option value="Ngắn hạn">Ngắn hạn</option>
+                <option value="Tự do">Tự do</option>
+                <option value="Thực tập">Thực tập</option>
+              </select>
+            </div>
+            {workType !== "Tự do" && (<div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Level
+              </label>
+              <select
+                id="level"
+                value={level}
+                onChange={(e) => setLevel(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="Thực tập sinh">Thực tập sinh</option>
+                <option value="Nhân viên Mới">Nhân viên Mới</option>
+                <option value="Nhân viên">Nhân viên</option>
+                <option value="Nhân viên Cấp cao">Nhân viên Cấp cao</option>
+                <option value="Trưởng nhóm">Trưởng nhóm</option>
+              </select>
+            </div>)}
+            {workType !== "Tự do" && (<div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Experience
+              </label>
+              <select
+                id="experience"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="Không yêu cầu kinh nghiệm">
+                  Không yêu cầu kinh nghiệm
+                </option>
+                <option value="Dưới 1 năm">Dưới 1 năm</option>
+                <option value="1 năm">1 năm</option>
+                <option value="2 năm">2 năm</option>
+                <option value="3 năm">3 năm</option>
+                <option value="4 năm">4 năm</option>
+                <option value="5 năm">5 năm</option>
+                <option value="Trên 5 năm">Trên 5 năm</option>
+              </select>
+            </div>)}
           </div>
-          <div className="mb-4">
+
+          {/* Country & City */}
+          {workType !== "Tự do" && (<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="country"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Country
+              </label>
+              <input
+                type="text"
+                id="country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                placeholder="Enter Country"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                City
+              </label>
+              <input
+                type="text"
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Enter City"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>)}
+
+          {/* Location */}
+          {workType !== "Tự do" && (<div>
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Location
+            </label>
             <input
               type="text"
+              id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Location"
+              placeholder="Enter Location"
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-          </div>
-          <div className="mb-4">
+          </div>)}
+
+          {/* Salary Type */}
+          <div>
+            <label
+              htmlFor="salaryType"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Salary Type
+            </label>
             <select
+              id="salaryType"
               value={salaryType}
               onChange={(e) => setSalaryType(e.target.value)}
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -213,39 +395,74 @@ const PostJob = () => {
               <option value="Ranged Salary">Ranged Salary</option>
             </select>
           </div>
-          <div className="mb-4">
-            {salaryType === "Fixed Salary" && (
+
+          {/* Fixed or Ranged Salary */}
+          {salaryType === "Fixed Salary" && (
+            <div>
+              <label
+                htmlFor="fixedSalary"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Fixed Salary
+              </label>
               <input
                 type="number"
+                id="fixedSalary"
                 placeholder="Enter Fixed Salary"
                 value={fixedSalary}
                 onChange={(e) => setFixedSalary(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
-            )}
-            {salaryType === "Ranged Salary" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            </div>
+          )}
+          {salaryType === "Ranged Salary" && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="salaryFrom"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Salary From
+                </label>
                 <input
                   type="number"
-                  placeholder="Salary From"
+                  id="salaryFrom"
+                  placeholder="Enter Minimum Salary"
                   value={salaryFrom}
                   onChange={(e) => setSalaryFrom(e.target.value)}
-                  className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <input
-                  type="number"
-                  placeholder="Salary To"
-                  value={salaryTo}
-                  onChange={(e) => setSalaryTo(e.target.value)}
-                  className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-            )}
-          </div>
-          <div className="mb-4">
+              <div>
+                <label
+                  htmlFor="salaryTo"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Salary To
+                </label>
+                <input
+                  type="number"
+                  id="salaryTo"
+                  placeholder="Enter Maximum Salary"
+                  value={salaryTo}
+                  onChange={(e) => setSalaryTo(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Required Skills */}
+          <div>
+            <label
+              htmlFor="skills"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Required Skills
+            </label>
             <input
               type="text"
               onKeyDown={handleSkillAdd} // Xử lý thêm kỹ năng
@@ -267,16 +484,48 @@ const PostJob = () => {
               ))}
             </div>
           </div>
-          <div className="mb-4">
+
+          {/* Description */}
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Job Description
+            </label>
             <textarea
+              id="description"
               rows="5"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Job Description"
+              placeholder="Enter Job Description"
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
+
+          {/* Application Deadline */}
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="applicationDeadline"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Application Deadline
+              </label>
+              <input
+                type="date"
+                id="applicationDeadline"
+                value={applicationDeadline}
+                onChange={(e) => setApplicationDeadline(e.target.value)}
+                min={new Date().toISOString().split("T")[0]} // Tự động đặt min là ngày hôm nay
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"

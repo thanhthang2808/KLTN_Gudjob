@@ -18,12 +18,15 @@ import {
   import logo from "@/assets/logo-gudjob.jpg";
   import { useNavigate } from "react-router-dom";
   import axios from "axios";
-  
+
+  const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
   function RecruiterHeader() {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState(null);
+    const [walletBalance, setWalletBalance] = useState();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [jobsDropdownOpen, setJobsDropdownOpen] = useState(false);
@@ -32,7 +35,7 @@ import {
       const getInfo = async () => {
         try {
           const response = await axios.get(
-            `${import.meta.env.VITE_REACT_APP_API_URL}/api/user/user-info`,
+            `${API_URL}/api/user/user-info`,
             { withCredentials: true }
           );
           setUserInfo(response.data.user);
@@ -41,6 +44,20 @@ import {
         }
       };
       getInfo();
+    }, []);
+
+    useEffect(() => {
+      const getWallet = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/api/wallet/get-user-wallet`, {
+            withCredentials: true,
+          });
+          setWalletBalance(response.data.wallet.balance);
+        } catch (error) {
+          console.error("Error fetching wallet info:", error);
+        }
+      };
+      getWallet();
     }, []);
   
     const handleLogout = () => {
@@ -166,7 +183,7 @@ import {
           </div>
   
           {/* Messaging Button */}
-          <div className="relative cursor-pointer">
+          <div className="relative cursor-pointer" onClick={() => navigate("/conversation/")}>
             <MessageCircle
               size={24}
               className="text-gray-500 hover:text-gray-800"
@@ -215,7 +232,7 @@ import {
                 >
                   <Wallet size={16} /> Ví của tôi{" "}
                   <span className="text-green-600">
-                    {formatAmount(userInfo?.walletBalance)}
+                    {formatAmount(walletBalance)}
                   </span>
                 </li>
                 <li

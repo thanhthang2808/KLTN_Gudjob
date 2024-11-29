@@ -4,45 +4,42 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import placeholderAvatar from "@/assets/default-user.png";
 import { MessageCircle } from "lucide-react";
+import { handleChat } from "@/services/chat-service";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [jobDetails, setJobDetails] = useState({});
-  const [workType, setWorkType] = useState("Dài hạn");
+  const [status, setStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  // Fetch applications
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const response = await axios.get(
           `${API_URL}/api/application/candidate/getall`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         setApplications(response.data.applications);
       } catch (error) {
         toast.error("Failed to fetch applications");
       }
     };
-
     fetchApplications();
   }, []);
 
+  // Fetch job details and associated recruiter information
   useEffect(() => {
     const fetchJobDetails = async () => {
       const jobPromises = applications.map(async (app) => {
         try {
           const jobResponse = await axios.get(
             `${API_URL}/api/job/${app.jobID}`,
-            {
-              withCredentials: true,
-            }
+            { withCredentials: true }
           );
-
           const job = jobResponse.data.job;
           const recruiterInfo = job?.postedBy
             ? await axios
@@ -77,25 +74,24 @@ const MyApplications = () => {
     }
   }, [applications]);
 
-  const handleChat = (recruiterID) => {
-    navigate(`/messages/${recruiterID}`);
-  };
-
-  // Cập nhật hàm xóa ứng tuyển
   const deleteApplication = async (id) => {
     try {
-      const response = await axios.delete(`${API_URL}/api/application/delete/${id}`, {
-        withCredentials: true,
-      });
+      const response = await axios.delete(
+        `${API_URL}/api/application/delete/${id}`,
+        { withCredentials: true }
+      );
       toast.success(response.data.message);
       setApplications((prevApplications) =>
         prevApplications.filter((application) => application._id !== id)
       );
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete application");
+      toast.error(
+        error.response?.data?.message || "Failed to delete application"
+      );
     }
   };
 
+  // Filter applications based on status and search query
   const filteredApplications = applications.filter((app) => {
     const job = jobDetails[app.jobID] || {};
     const jobTitle = job.title ? job.title.toLowerCase() : "";
@@ -104,11 +100,14 @@ const MyApplications = () => {
       : "";
     const searchLowercase = searchQuery.toLowerCase();
 
-    const matchesSearch = jobTitle.includes(searchLowercase) || companyName.includes(searchLowercase);
+    // Check if the job matches the search query
+    const matchesSearch =
+      jobTitle.includes(searchLowercase) || companyName.includes(searchLowercase);
 
-    return (
-      job.workType === workType && matchesSearch
-    );
+    // Check if the job matches the selected status
+    const matchesStatus = status === "" || app.status === status;
+
+    return matchesStatus && matchesSearch;
   });
 
   return (
@@ -119,7 +118,7 @@ const MyApplications = () => {
 
       {/* Container for search bar and dropdown */}
       <div className="mb-6 flex justify-center items-center space-x-4">
-        {/* Thanh tìm kiếm */}
+        {/* Search bar */}
         <input
           type="text"
           value={searchQuery}
@@ -128,14 +127,16 @@ const MyApplications = () => {
           className="w-full sm:w-2/3 py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        {/* Dropdown lọc theo loại công việc */}
+        {/* Dropdown filter for status */}
         <select
-          value={workType}
-          onChange={(e) => setWorkType(e.target.value)}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
           className="py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="Dài hạn">Dài hạn</option>
-          <option value="Ngắn hạn">Ngắn hạn</option>
+          <option value="">Tất cả</option>
+          <option value="Processing">Đang xử lí</option>
+          <option value="Accepted">Được chấp nhận</option>
+          <option value="Rejected">Bị từ chối</option>
         </select>
       </div>
 
@@ -161,7 +162,7 @@ const MyApplications = () => {
 
                 {/* Job Details */}
                 <div className="flex-grow">
-                  <h2 className="text-lg font-bold text-gray-800">
+                  <h2 className="text-lg font-bold text-gray-800 hover:underline cursor-pointer" onClick={() => navigate(`/candidate/job/${job._id}`)}>
                     {job.title || "Job Title Not Available"}
                   </h2>
                   <p className="text-gray-600">
@@ -176,14 +177,32 @@ const MyApplications = () => {
                       : "Not Specified"}
                   </p>
                   <p className="text-gray-500 text-sm">
-  Applied on: {new Date(app.createdAt).toLocaleString() || "Not Specified"}
-</p>
+                  Work Type: {job.workType}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Applied on:{" "}
+                    {new Date(app.createdAt).toLocaleString() || "Not Specified"}
+                  </p>
+                </div>
 
+                {/* Status Badge */}
+                <div
+                  className={`px-3 py-1 rounded-lg text-white text-sm font-bold ${
+                    app.status === "Processing"
+                      ? "bg-yellow-400"
+                      : app.status === "Rejected"
+                      ? "bg-red-500"
+                      : app.status === "Accepted"
+                      ? "bg-green-500"
+                      : "bg-gray-300"
+                  }`}
+                >
+                  {app.status || "Unknown Status"}
                 </div>
 
                 {/* Chat Button */}
                 <button
-                  onClick={() => handleChat(postedBy._id)}
+                  onClick={() => handleChat(postedBy._id, navigate)}
                   className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
@@ -197,6 +216,7 @@ const MyApplications = () => {
                 >
                   <span className="w-5 h-5 mr-2">🗑️</span> Delete
                 </button>
+                
               </div>
             );
           })}

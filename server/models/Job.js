@@ -10,8 +10,7 @@ const jobSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, "Please provide a description."],
-    minLength: [10, "Description must contain at least 10 Characters!"],
-    maxLength: [500, "Description cannot exceed 500 Characters!"],
+    maxLength: [1000, "Description cannot exceed 1000 Characters!"],
   },
   category: {
     type: String,
@@ -19,45 +18,38 @@ const jobSchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: [true, "Please provide a country name."],
   },
   city: {
     type: String,
-    required: [true, "Please provide a city name."],
   },
   location: {
     type: String,
-    required: [true, "Please provide location."],
   },
   fixedSalary: {
     type: Number,
     min: [0, "Salary must be a positive number."],
-    max: [999999999, "Salary cannot exceed 9 digits."],
+    max: [9999999999, "Salary cannot exceed 10 digits."],
   },
   salaryFrom: {
     type: Number,
     min: [0, "Salary must be a positive number."],
-    max: [999999999, "Salary cannot exceed 9 digits."],
+    max: [9999999999, "Salary cannot exceed 10 digits."],
   },
   salaryTo: {
     type: Number,
     min: [0, "Salary must be a positive number."],
-    max: [999999999, "Salary cannot exceed 9 digits."],
-  },
-  negotiableSalary: {
-    type: Boolean,
-    default: false,
+    max: [9999999999, "Salary cannot exceed 10 digits."],
   },
   applicationDeadline: {
     type: Date,
   },
   experience: {
     type: String,
-      },
+    enum: ["Không yêu cầu kinh nghiệm", "Dưới 1 năm", "1 năm", "2 năm", "3 năm", "4 năm", "5 năm", "Trên 5 năm"],
+  },
   level: {
     type: String,
-    enum: ["Intern", "Junior", "Mid", "Senior", "Lead"],
-
+    enum: ["Thực tập sinh", "Nhân viên Mới", "Nhân viên", "Nhân viên Cấp cao", "Trưởng nhóm"],
   },
   vacancies: {
     type: Number,
@@ -65,19 +57,15 @@ const jobSchema = new mongoose.Schema({
   },
   workType: {
     type: String,
-    enum: ["Full-time", "Part-time", "Contract", "Internship"],
-  
+    enum: ["Dài hạn", "Ngắn hạn", "Tự do", "Thực tập"],
   },
   gender: {
     type: String,
-    enum: ["Male", "Female", "Any"],
+    enum: ["Nam", "Nữ", "Tất cả"],
   },
   requiredSkills: {
     type: [String],
     default: [],
-  },
-  expiredDate: {
-    type: Date,
   },
   expired: {
     type: Boolean,
