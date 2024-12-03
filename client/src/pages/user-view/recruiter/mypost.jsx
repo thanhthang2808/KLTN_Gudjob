@@ -14,6 +14,7 @@ const MyPosts = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalJobId, setModalJobId] = useState(null);
   const [deletedJob, setDeletedJob] = useState(null);
+  const [type, setType] = useState("");
   const navigate = useNavigate(); // Navigation hook
 
   // Fetching all jobs
@@ -50,7 +51,12 @@ const MyPosts = () => {
         `${API_URL}/api/application/get-applications-for-job/${jobId}`,
         { withCredentials: true }
       );
+      const res = await axios.get(
+        `${API_URL}/api/job/${jobId}`,
+        { withCredentials: true }
+      );
       setApplicationsData(response.data.applications);
+      setType(res.data.job.workType);
       setModalJobId(jobId); // Set job ID for the modal
       setShowModal(true); // Open the modal
     } catch (error) {
@@ -226,18 +232,18 @@ const MyPosts = () => {
                           onClick={() =>
                             handleChat(application.applicantID.user, navigate)
                           } // Nhắn tin cho ứng viên
-                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 mb-2"
                         >
                           Nhắn tin
                         </button>
-                        <button
+                        {application.status === "Accepted" && type === "Tự do" && (<button
                           onClick={() =>
-                            handleChat(application.applicantID.user, navigate)
+                            navigate(`/recruiter/assign-task/${application._id}`)
                           } // Nhắn tin cho ứng viên
                           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                         >
-                          Nhắn tin
-                        </button>
+                          Giao việc
+                        </button>)}
                       </div>
                     </div>
                   ))}
@@ -297,8 +303,14 @@ const MyPosts = () => {
                     >
                       Xóa
                     </button>
+                    {job.workType === "Tự do" && (
+              <div className=" bottom-1 right-1 text-md px-1 py-1 rounded-lg mt-10 ml-10">
+                <text className="text-green-400 font-bold">Việc làm Freelance</text>
+              </div>
+            )}
                   </div>
                 </div>
+                
               </div>
             ))}
           </div>

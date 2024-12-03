@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -17,6 +18,7 @@ function CommonForm({
   onSubmit,
   buttonText,
 }) {
+  const [acceptTerms, setAcceptTerms] = useState(true);
   function renderInputsByComponentType(getControlItem) {
     let element = null;
     const value = formData[getControlItem.name] || "";
@@ -39,32 +41,32 @@ function CommonForm({
           />
         );
         break;
-        case "select":
-          element = (
-            <Select
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  [getControlItem.name]: value,
-                })
-              }
-              value={value}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={getControlItem.placeholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {getControlItem.options && getControlItem.options.length > 0
-                  ? getControlItem.options.map((optionItem) => (
-                      <SelectItem key={optionItem} value={optionItem}>
-                        {optionItem} {/* Hiển thị giá trị option */}
-                      </SelectItem>
-                    ))
-                  : null}
-              </SelectContent>
-            </Select>
-          );
-          break;
+      case "select":
+        element = (
+          <Select
+            onValueChange={(value) =>
+              setFormData({
+                ...formData,
+                [getControlItem.name]: value,
+              })
+            }
+            value={value}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={getControlItem.placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {getControlItem.options && getControlItem.options.length > 0
+                ? getControlItem.options.map((optionItem) => (
+                    <SelectItem key={optionItem} value={optionItem}>
+                      {optionItem} {/* Hiển thị giá trị option */}
+                    </SelectItem>
+                  ))
+                : null}
+            </SelectContent>
+          </Select>
+        );
+        break;
       case "textarea":
         element = (
           <Textarea
@@ -101,6 +103,13 @@ function CommonForm({
     }
     return element;
   }
+
+  useEffect(() => {
+    if (buttonText === "Sign up") {
+      setAcceptTerms(false);
+    }
+  }, [buttonText]);
+
   return (
     <form onSubmit={onSubmit}>
       <div className="flex flex-col gap-3">
@@ -122,7 +131,33 @@ function CommonForm({
           </a>
         </div>
       )}
+
+      {buttonText === "Sign up" && (
+        <div className="mt-4">
+          <div className="text-right mb-1 mt-1">
+            {/* Additional sign-up specific fields can go here */}
+          </div>
+
+          <div className="mt-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="text-sm text-gray-700">
+                I accept the{" "}
+                <a href="/terms-and-conditions" className="text-blue-500 hover:underline">
+                  terms and conditions
+                </a>
+              </span>
+            </label>
+          </div>
+        </div>
+      )}
       <Button
+        disabled={!acceptTerms}
         type="submit"
         className="mt-2 w-full bg-blue-500 text-white hover:bg-blue-600"
       >

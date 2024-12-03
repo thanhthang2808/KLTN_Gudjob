@@ -10,6 +10,7 @@ import {
     Home,
     Bell,
     MessageCircle,
+    Tag,
   } from "lucide-react"; // Added icons for dropdown items
   import { useDispatch, useSelector } from "react-redux";
   import { logoutUser } from "@/store/auth-slice";
@@ -225,6 +226,12 @@ import {
                   onClick={() => navigate("/recruiter/profile")}
                 >
                   <Settings size={16} /> Cài đặt thông tin cá nhân
+                </li>
+                <li
+                  className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
+                  onClick={() => navigate("/recruiter/task-manager")}
+                >
+                  <Tag size={16} /> Task manager
                 </li>
                 <li
                   className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"

@@ -91,17 +91,27 @@ function MyWallet() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-center mb-4">
+        <h1 className="text-3xl font-bold text-center mb-1">
           <Wallet className="inline-block mr-2 text-blue-600" />
           Số dư:{" "}
           <span className="text-green-600">
             {formatAmount(wallet.balance)}
           </span>
         </h1>
+        {wallet.lockedBalance > 0 && (
+          /* Show locked balance if there is any */
+          <p className="text-sm text-gray-600">
+            Số dư bị khóa:{" "}
+            <span className="text-red-600">
+              {formatAmount(wallet.lockedBalance)}
+            </span>
+          </p>
+
+        )}
 
         <button
           onClick={() => setShowDeposit(!showDeposit)}
-          className="flex items-center bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="flex items-center bg-blue-500 mt-4 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
         >
           <ArrowUpCircle className="inline-block mr-2" /> Nạp tiền
         </button>

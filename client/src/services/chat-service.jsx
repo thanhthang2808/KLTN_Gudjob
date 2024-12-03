@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 export const handleChat = async (memberId, navigate) => {
@@ -17,4 +16,15 @@ export const handleChat = async (memberId, navigate) => {
     }
   };
 
+export const getOtherPersonInfoInConversation = async (conversationId) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/chat/other-person`, {
+        params: { conversationId },
+        withCredentials: true,
+      });
+      return data;
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin người dùng:", error);
+    }
+  };
 

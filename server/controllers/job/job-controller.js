@@ -319,7 +319,10 @@ const getSearchResults = async (req, res) => {
     if (location && location !== "Khác") {
       searchConditions.city = location;
     }
-    searchConditions.workType = workType;
+    
+    if (workType && workType !== "Tất cả") {
+      searchConditions.workType = workType;
+    }
 
     searchConditions.expired = false;
     searchConditions.status = "Approved";
