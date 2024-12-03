@@ -34,7 +34,7 @@ const PORT = process.env.PORT || 5000;
 // Tích hợp Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Frontend URL
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -43,7 +43,7 @@ const io = new Server(server, {
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // Frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: [
       "Content-Type",
