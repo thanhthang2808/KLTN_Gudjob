@@ -14,7 +14,7 @@ function SearchResults() {
     searchQuery,
     selectedCategories,
     location: locationQuery,
-    workType,
+    workType: workTypeQuery,
   } = location.state || {
     searchQuery: "",
     selectedCategories: [],
@@ -53,7 +53,7 @@ function SearchResults() {
               searchQuery,
               selectedCategories: selectedCategories.join(","),
               location: locationQuery,
-              workType
+              workType: workTypeQuery,
             },
             withCredentials: true, // Ensure that cookies/authorization are sent
           }
@@ -71,7 +71,7 @@ function SearchResults() {
     };
 
     fetchJobs();
-  }, [searchQuery, selectedCategories, locationQuery]);
+  }, [searchQuery, selectedCategories, locationQuery, workTypeQuery]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {

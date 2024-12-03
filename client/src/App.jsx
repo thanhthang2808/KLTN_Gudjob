@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AuthLayout from "./components/auth/layout";
 import AuthLogin from "./pages/auth/login";
 import AuthRegister from "./pages/auth/register";
@@ -40,11 +40,15 @@ import UserDetail from "./pages/admin-view/user-detail";
 import UpdateCV from "./pages/user-view/candidate/updatecv";
 import RecruiterJobDetails from "./pages/user-view/recruiter/jobdetails";
 import ConversationPage from "./pages/user-view/conversation";
+import AssignTask from "./pages/user-view/recruiter/assign-task";
+import TaskManager from "./pages/user-view/recruiter/task-mamager";
+import TermsAndConditions from "./pages/user-view/terms-and-conditions";
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.auth
   );
   const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -52,7 +56,7 @@ function App() {
 
   if (isLoading) return <Skeleton className="w-full h-full" />;
 
-  const shouldShowFooter = !location.pathname.includes("conversation");
+  const shouldShowFooter = (!location.pathname.includes("conversation")&&!location.pathname.includes("auth")) ;
 
   return (
     <div className="flex flex-col max-h-screen w-screen overflow-x-hidden">
@@ -126,6 +130,8 @@ function App() {
             <Route path="postjob" element={<PostJob />} />
             <Route path="forum" element={<HRForum />} />
             <Route path="job/:id" element={<RecruiterJobDetails />} />
+            <Route path="assign-task/:id" element={<AssignTask />} />
+            <Route path="task-manager" element={<TaskManager />} />
             <Route
               path="candidate-applications"
               element={<ApplicationsFromCandidate />}
@@ -142,6 +148,7 @@ function App() {
             <Route path=":conversationId" element={<ConversationPage />} />
             <Route path="" element={<ConversationPage />} />
           </Route>
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/unauth-page" element={<UnauthPage />} />
           <Route path="*" element={<NotFound />} />
           {/* <Route path="/" element={<AuthLogin />} /> */}

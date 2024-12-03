@@ -1,5 +1,6 @@
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
+const User = require("../../models/User");
 
 // Tạo cuộc trò chuyện
 const createConversation = async (req, res) => {
@@ -78,7 +79,7 @@ const getConversations = async (req, res) => {
   try {
     const conversations = await Conversation.find({ members: id })
       .sort({ updatedAt: -1 }) // Sắp xếp theo thời gian mới nhất
-      .populate("members", "name avatar email role"); // Lấy thông tin cơ bản của thành viên
+      .populate("members", "name companyName avatar email role"); // Lấy thông tin cơ bản của thành viên
 
     res.status(200).json(conversations);
   } catch (error) {
@@ -122,10 +123,51 @@ const markMessageAsRead = async (req, res) => {
   }
 };
 
+const getOtherPersonInConversation = async (req, res) => {
+  const { conversationId } = req.query;
+  const { id } = req.user;
+
+  try {
+    // Tìm cuộc trò chuyện theo ID
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" });
+    }
+
+    // Kiểm tra xem người dùng hiện tại có nằm trong danh sách members hay không
+    if (!conversation.members.includes(id)) {
+      return res.status(403).json({ message: "Bạn không có quyền truy cập vào cuộc trò chuyện này" });
+    }
+
+    // Lấy ID của người dùng khác trong cuộc trò chuyện
+    const otherPersonId = conversation.members.find((member) => member.toString() !== id);
+
+    if (!otherPersonId) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng khác trong cuộc trò chuyện" });
+    }
+
+    // Lấy thông tin người dùng khác
+    const otherPersonInfo = await User.findById(otherPersonId).select("name email avatar companyName");
+
+    if (!otherPersonInfo) {
+      return res.status(404).json({ message: "Không tìm thấy thông tin của người dùng khác" });
+    }
+
+    res.status(200).json({ message: "success", otherPersonInfo });
+  } catch (error) {
+    console.error("Error in getOtherPersonInConversation:", error);
+    res.status(500).json({ message: "Lỗi khi lấy thông tin người khác trong cuộc trò chuyện", error });
+  }
+};
+
+
+
 module.exports = {
   createConversation,
   sendMessage,
   getConversations,
   getMessages,
   markMessageAsRead,
+  getOtherPersonInConversation,
 };

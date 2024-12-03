@@ -1,62 +1,3 @@
-// const express = require("express");
-// const mongoose = require("mongoose");
-// const cookieParser = require("cookie-parser");
-// const cors = require("cors");
-// const dotenv = require("dotenv");
-// const fileUpload = require('express-fileupload');
-// const authRoutes = require("./routes/auth/auth-routes");
-// const userRoutes = require("./routes/user/user-routes");
-// const jobRoutes = require("./routes/job/job-routes");
-// const applicationRoutes = require("./routes/job/application-routes");
-// const walletRoutes = require("./routes/user/wallet-routes");
-
-
-// const { paymentHandler } = require("./controllers/payment/payment");
-
-// dotenv.config();
-
-// mongoose
-//   .connect(process.env.MONGODB_URI)
-//   .then(() => console.log("Connected to MongoDB"))
-//   .catch((error) => console.log(error));
-
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", 
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: [
-//       "Content-Type",
-//       "Authorization",
-//       "Cache-Control",
-//       "Expires",
-//       "Pragma",
-//     ],
-//     credentials: true,
-//   })
-// );
-
-// app.use(
-//   fileUpload({
-//     useTempFiles: true,
-//     tempFileDir: "/tmp/",
-//   })
-// );
-// app.use(cookieParser());
-// app.use(express.json());
-// app.use("/api/auth", authRoutes);
-// app.use("/api/user", userRoutes);
-// app.use("/api/job", jobRoutes);
-// app.use("/api/application", applicationRoutes);
-// app.use("/api/wallet", walletRoutes);
-
-
-// app.post("/payment", paymentHandler)
-
-// app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -72,6 +13,7 @@ const jobRoutes = require("./routes/job/job-routes");
 const applicationRoutes = require("./routes/job/application-routes");
 const walletRoutes = require("./routes/user/wallet-routes");
 const chatRoutes = require("./routes/chat-notification/chat-routes");
+const taskRoutes = require("./routes/task/task-routes");
 const { paymentHandler } = require("./controllers/payment/payment");
 const Message = require("./models/Message");
 const Conversation = require("./models/Conversation");
@@ -131,6 +73,7 @@ app.use("/api/job", jobRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/task", taskRoutes);
 app.post("/payment", paymentHandler);
 
 // Quản lý kết nối Socket.IO
@@ -154,11 +97,15 @@ io.on("connection", (socket) => {
       conversationId,
       content,
       sender,
-      createdAt: new Date(),
+      
     });
   
     try {
       await newMessage.save(); // Lưu tin nhắn vào DB
+      await Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: content,
+        updatedAt: Date.now(),
+      });
       onlineUsers.forEach((socketId, userId) => {
         if (userId !== sender) {
           io.to(socketId).emit(`message_${conversationId}`, newMessage); // Gửi tin nhắn tới người nhận

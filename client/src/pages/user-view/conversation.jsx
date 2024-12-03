@@ -5,12 +5,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { checkAuth } from "@/store/auth-slice";
 import chatImage from "@/assets/chat-image.png";
 import io from "socket.io-client"; // Import Socket.io Client
-import { PlusCircle } from "lucide-react";
+import { Ellipsis, PlusCircle } from "lucide-react";
+import { getOtherPersonInfoInConversation } from "@/services/chat-service";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [otherPersonsInfo, setOtherPersonsInfo] = useState({});
   const [conversation, setConversation] = useState([]);
   const [conversations, setConversations] = useState([]); // Danh sách các cuộc trò chuyện
 
@@ -53,6 +55,19 @@ const ConversationPage = () => {
 
     fetchConversations();
   }, []);
+
+  useEffect(() => {
+    const fetchOtherPersonsInfo = async () => {
+      const infoMap = {};
+      for (const conversation of conversations) {
+        const data = await getOtherPersonInfoInConversation(conversation._id);
+        infoMap[conversation._id] = data.otherPersonInfo; // Lưu trữ thông tin
+      }
+      setOtherPersonsInfo(infoMap);
+    };
+
+    fetchOtherPersonsInfo();
+  }, [conversations]);
 
   useEffect(() => {
     // Lấy danh sách tin nhắn khi conversationId thay đổi
@@ -157,13 +172,26 @@ const ConversationPage = () => {
           {conversations.map((conversation) => (
             <li
               key={conversation._id}
-              className="mb-2 hover:bg-gray-700 rounded-lg p-2"
+              className={`p-2 rounded-lg cursor-pointer hover:bg-gray-700 ${
+                conversationId === conversation._id ? "bg-gray-700" : ""
+              }`}
             >
-              <Link
-                to={`/conversation/${conversation._id}`}
-                className="text-blue-400 hover:text-white"
-              >
-                {conversation._id || "Cuộc trò chuyện mới"}
+              <Link to={`/conversation/${conversation._id}`}>
+                <div className={`flex items-center hover:text-white ${
+                conversationId === conversation._id ? "text-white" : ""
+              }`}>
+                  <img
+                    src={otherPersonsInfo[conversation._id]?.avatar?.url}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div className="ml-3">
+                    <h3 className="font-semibold">
+                      {otherPersonsInfo[conversation._id]?.companyName ||
+                        otherPersonsInfo[conversation._id]?.name || "Username"}
+                    </h3>
+                  </div>
+                </div>
               </Link>
             </li>
           ))}
@@ -186,9 +214,23 @@ const ConversationPage = () => {
           </div>
         ) : (
           <>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">
-              Conversation_{conversationId}
-            </h2>
+            <div className="flex items-center mb-4">
+              <img
+                src={otherPersonsInfo[conversationId]?.avatar?.url}
+                alt="Avatar"
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div className="ml-5">
+                <h3 className="font-bold text-2xl">
+                  {otherPersonsInfo[conversationId]?.companyName ||
+                    otherPersonsInfo[conversationId]?.name}
+                </h3>
+                <p className="text-gray-500">
+                  {otherPersonsInfo[conversationId]?.companyName ? "Nhà tuyển dụng" : "Ứng viên"}{" "}
+                </p>
+              </div>
+              <Ellipsis size={25} className="ml-auto cursor-pointer" />
+            </div>
             <div className="flex-1 overflow-y-auto p-4 bg-gray-100 rounded-lg shadow-md">
               <div className="messages-container space-y-4">
                 {Array.isArray(messages) && messages.length > 0 ? (

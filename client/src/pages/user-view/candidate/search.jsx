@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   MapPin,
   Briefcase,
   ChevronDown,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -19,6 +20,12 @@ function CandidateSearch() {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showWorkTypeDropdown, setShowWorkTypeDropdown] = useState(false);
   const [workType, setWorkType] = useState("");
+
+  useEffect(() => {
+    if (workType === "Tự do") {
+      setLocation("");
+    }
+  }, [workType]);
 
   const categories = [
     "Kinh doanh/Bán hàng",
@@ -41,7 +48,7 @@ function CandidateSearch() {
     "Khác",
   ];
   const locations = ["", "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Khác"];
-  const workTypes = ["Dài hạn", "Ngắn hạn", "Tự do", "Thực tập"];
+  const workTypes = ["Tất cả", "Dài hạn", "Ngắn hạn", "Tự do", "Thực tập"];
 
   const handleCategoryChange = (category) => {
     if (selectedCategories.includes(category)) {
@@ -70,7 +77,7 @@ function CandidateSearch() {
         searchQuery,
         selectedCategories,
         location: location === "Khác" ? customLocation : location,
-        workType,
+        workType: workType === "" ? "" : workType,
       },
     });
   };
@@ -145,7 +152,7 @@ function CandidateSearch() {
         <div className="h-10 border-l border-gray-300 mx-2 hidden sm:block"></div>
 
         {/* Location Dropdown */}
-        <div className="relative w-full sm:w-auto">
+        {workType !== "Tự do" && (<div className="relative w-full sm:w-auto">
           <button
             onClick={() => setShowLocationDropdown((prev) => !prev)}
             className="flex items-center border bg-white rounded-lg p-2 w-full sm:w-auto text-gray-700"
@@ -186,9 +193,11 @@ function CandidateSearch() {
               )}
             </div>
           )}
-        </div>
+          
+        </div>)}
 
         <div className="h-10 border-l border-gray-300 mx-2 hidden sm:block"></div>
+        
 
         {/* WorkType Dropdown */}
         <div className="relative w-full sm:w-auto">
@@ -196,7 +205,8 @@ function CandidateSearch() {
             onClick={() => setShowWorkTypeDropdown((prev) => !prev)}
             className="flex items-center bg-white rounded-lg p-2 w-full sm:w-auto text-gray-700"
           >
-            <span>{workType || "Loại công việc"}</span>
+            <Clock className="text-gray-500 mr-2" />
+            <span>{workType || "Tất cả"}</span>
             <ChevronDown className="ml-2" />
           </button>
           {showWorkTypeDropdown && (

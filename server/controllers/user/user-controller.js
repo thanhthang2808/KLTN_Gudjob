@@ -140,6 +140,20 @@ const getSingleUser = async (req, res) => {
   }
 };
 
+const getListCandidate = async (req, res) => {
+  try {   
+    
+    const users = await User.find({ role: "Candidate" }).select("-password");
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 const getListUser = async (req, res) => {
   try {   
     
@@ -182,4 +196,4 @@ const lockAccount = async (req, res) => {
 
 
 
-module.exports = { getUserInfo, updateAvatar, getSingleUser, updateCandidateInfo, getListUser, lockAccount };
+module.exports = { getUserInfo, updateAvatar, getSingleUser, updateCandidateInfo, getListCandidate, getListUser, lockAccount };
