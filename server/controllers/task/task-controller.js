@@ -95,5 +95,77 @@ const getMyTaskByRecruiter = async (req, res) => {
   }
 }
 
+const acceptTaskByCandidate = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Recruiter") {
+      return res.status(400).json({
+        success: false,
+        message: "Recruiter not allowed to access this resource.",
+      });
+    }
 
-module.exports = { createTaskAndAssign, getMyTaskByRecruiter };
+    const { taskId } = req.params;
+    const { user } = req;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    // Kiểm tra xem task có phải của ứng viên không
+    if (task.applicantId.toString() !== user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Cập nhật trạng thái task
+    task.payment.status = "Accepted";
+    await task.save();
+
+    res.status(200).json({ message: "Đã chấp nhận nhiệm vụ!" });
+  }
+  catch (error) {
+    console.error("Lỗi khi chấp nhận task:", error);
+    res.status(500).json({ message: "Có lỗi khi chấp nhận task!" });
+  }
+}
+
+const rejectTaskByCandidate = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Recruiter") {
+      return res.status(400).json({
+        success: false,
+        message: "Recruiter not allowed to access this resource.",
+      });
+    }
+
+    const { taskId } = req.params;
+    const { user } = req;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    // Kiểm tra xem task có phải của ứng viên không
+    if (task.applicantId.toString() !== user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Cập nhật trạng thái task
+    task.payment.status = "Rejected";
+    await task.save();
+
+    res.status(200).json({ message: "Đã từ chối nhiệm vụ!" });
+
+  } catch (error) {
+    console.error("Lỗi khi từ chối task:", error);
+    res.status(500).json({ message: "Có lỗi khi từ chối task!" });
+  }
+}
+
+
+module.exports = { createTaskAndAssign, getMyTaskByRecruiter, acceptTaskByCandidate, rejectTaskByCandidate };
