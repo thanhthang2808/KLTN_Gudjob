@@ -167,5 +167,40 @@ const rejectTaskByCandidate = async (req, res) => {
   }
 }
 
+const deleteTaskByRecruiter = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Candidate") {
+      return res.status(400).json({
+        success: false,
+        message: "Candidate not allowed to access this resource.",
+      });
+    }
+
+    const { taskId } = req.params;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    // Kiểm tra xem task có phải của nhà tuyển dụng không
+    if (task.employerId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Xóa task
+    await task.remove();
+
+    res.status(200).json({ message: "Đã xóa task!" });
+  }
+  catch (error) {
+    console.error("Lỗi khi xóa task:", error);
+    res.status(500).json({ message: "Có lỗi khi xóa task!" });
+  }
+
+}
+
 
 module.exports = { createTaskAndAssign, getMyTaskByRecruiter, acceptTaskByCandidate, rejectTaskByCandidate };

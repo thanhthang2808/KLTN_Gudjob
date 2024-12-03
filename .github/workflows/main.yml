@@ -33,4 +33,5 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "gudjob-production-app" #Must be unique in Heroku
           heroku_email: "thanhthang2808@gmail.com"
+          appdir: "server" 
           
