@@ -15,14 +15,12 @@ jobs:
 
       # Cài đặt Heroku CLI
       - name: Set up Heroku CLI
-        uses: akshnz/heroku-cli-action@v2.0.0
+        uses: heroku/actions/setup@v1
 
       # Đăng nhập vào Heroku
       - name: Log in to Heroku
-        uses: akshnz/heroku-cli-action@v2.0.0
-        with:
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
 
       # Chuyển đến thư mục `server/` và deploy lên Heroku
       - name: Deploy to Heroku
