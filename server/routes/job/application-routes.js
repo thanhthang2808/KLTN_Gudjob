@@ -1,6 +1,6 @@
 const express = require("express");
 const { authMiddleware } = require("../../controllers/auth/auth-controller");
-const { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication, getApplicationsForAJob, checkJobAppliedForCandidate } = require("../../controllers/job/application-controller");
+const { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication, getApplicationsForAJob, checkJobAppliedForCandidate, getTotalApplications, scheduleInterview } = require("../../controllers/job/application-controller");
 
 const router = express.Router();
 
@@ -12,5 +12,7 @@ router.get("/candidate/check-job-applied/:id", authMiddleware, checkJobAppliedFo
 router.delete("/delete/:id", authMiddleware, candidateDeleteApplication);
 router.post("/accept/:id", acceptApplication);
 router.delete("/reject/:id", rejectApplication);
+router.get("/total-applications", authMiddleware, getTotalApplications);
+router.put("/schedule-interview", authMiddleware, scheduleInterview);
 
 module.exports = router;    

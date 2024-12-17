@@ -11,11 +11,10 @@ function AuthLayout() {
       >
         <div className="max-w-md space-y-6 text-center text-white bg-black bg-opacity-50 p-6 rounded-lg">
           <h1 className="text-5xl font-bold tracking-tight">
-            Welcome to Gudjob!
+            Chào mừng đến với Gudjob!
           </h1>
           <p className="text-lg leading-relaxed mt-4">
-            Your journey to a better career starts here. Join us and find the
-            best opportunities tailored just for you.
+            Sàn giao dịch việc làm hàng đầu tại Việt Nam.
           </p>
         </div>
       </div>

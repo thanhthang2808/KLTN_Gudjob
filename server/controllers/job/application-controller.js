@@ -1,70 +1,69 @@
 const Application = require("../../models/Application");
 const Job = require("../../models/Job");
 const cloudinary = require("../../uploads/cloudinary");
+const { sendEmail } = require("../chat-notification/send-mail-controller");
 
 const postApplication = async (req, res) => {
   try {
     const { role } = req.user;
+
     if (role === "Recruiter") {
-      return res.status(400).json({ message: "Recruiter not allowed to access this resource." });
-    }
-    console.log("resume:", req.files);
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ message: "Resume File Required!" });
+      return res
+        .status(400)
+        .json({ message: "Recruiter not allowed to access this resource." });
     }
 
-    const { resume } = req.files;
+    const { name, email, coverLetter, phone, address, jobId, resume } = req.body;
 
-    const allowedFormats = ["application/pdf", "application/msword", "image/png", "image/jpeg", "image/jpg"];
-    if (!allowedFormats.includes(resume.mimetype)) {
-      return res.status(400).json({ message: "Invalid file type. Please upload a PNG file." });
-    }
-
-    const cloudinaryResponse = await cloudinary.uploader.upload(resume.tempFilePath);
-
-    if (!cloudinaryResponse || cloudinaryResponse.error) {
-      console.error("Cloudinary Error:", cloudinaryResponse.error || "Unknown Cloudinary error");
-      return res.status(500).json({ message: "Failed to upload Resume to Cloudinary" });
-    }
-
-    const { name, email, coverLetter, phone, address, jobId } = req.body;
-    const applicantID = {
-      user: req.user.id,
-      role: "Candidate",
-    };
+    // Kiểm tra dữ liệu từ client
     if (!jobId) {
       return res.status(404).json({ message: "Job not found!" });
     }
 
+    if (!name || !email || !coverLetter || !phone || !address || !resume) {
+      return res.status(400).json({ message: "Please fill all fields." });
+    }
+
+    console.log("cover", coverLetter);
+
+    console.log("resume", resume.url, resume.public_id);
+    // Kiểm tra thông tin CV (resume)
+    if (!resume.url || !resume.public_id) {
+      return res.status(400).json({
+        message: "Invalid resume information. Please select a valid CV.",
+      });
+    }
+
+    // Tìm thông tin công việc
     const jobDetails = await Job.findById(jobId);
     if (!jobDetails) {
       return res.status(404).json({ message: "Job not found!" });
     }
+
+    // Chuẩn bị thông tin ứng dụng
+    const applicantID = {
+      user: req.user.id,
+      role: "Candidate",
+    };
 
     const employerID = {
       user: jobDetails.postedBy,
       role: "Recruiter",
     };
 
-    const jobID = jobId;
-    if (!name || !email || !coverLetter || !phone || !address || !applicantID || !employerID || !resume || !jobID) {
-      return res.status(400).json({ message: "Please fill all fields." });
-    }
-
+    // Tạo ứng dụng
     const application = await Application.create({
       name,
       email,
       coverLetter,
       phone,
       address,
-      jobID,
+      jobID: jobId,
       applicantID,
       employerID,
-      resume: {
-        public_id: cloudinaryResponse.public_id,
-        url: cloudinaryResponse.secure_url,
-      },
+      resume,
     });
+
     res.status(200).json({
       success: true,
       message: "Application Submitted!",
@@ -75,6 +74,7 @@ const postApplication = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 const recruiterGetAllApplications = async (req, res) => {
   try {
@@ -219,8 +219,50 @@ const checkJobAppliedForCandidate = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
-  
+
+const getTotalApplications = async (req, res) => {
+  try {
+    const totalApplications = await Application.countDocuments();
+    res.status(200).json({ success: true, totalApplications });
+  } catch (error) {
+    console.error("Error in getTotalApplications:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}  
+
+const scheduleInterview = async (req, res) => {
+  try {
+    const { applicationId, interviewTime, interviewConfirmed, interviewAddress } = req.body;
+
+    if (!applicationId || !interviewTime || !interviewConfirmed) {
+      return res.status(400).json({ success: false, message: "Missing required fields!" });
+    }
+
+    const application = await Application.findById(applicationId).populate("employerID.user");
+
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Application not found!" });
+    }
+
+    application.interviewTime = interviewTime;
+    application.interviewConfirmed = interviewConfirmed;
+    application.interviewAddress = interviewAddress;
+
+    await application.save();
+
+    sendEmail(application.email, 'Xác nhận lịch phỏng vấn!', `Chúc mừng bạn đã nhận được lời mời phỏng vấn từ ${application.employerID.user.companyName} !\n\n Thời gian: ${interviewTime}\n Địa chỉ: ${interviewAddress}\n\n Vui lòng xác nhận tham gia phỏng vấn bằng cách truy cập vào tài khoản của bạn.`);
+
+    res.status(200).json({
+      success: true,
+      message: "Interview scheduled successfully!",
+      data: application,
+    });
+  } catch (error) {
+    console.error("Error scheduling interview:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 
   
 
-module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication, getApplicationsForAJob, checkJobAppliedForCandidate };
+module.exports = { postApplication, recruiterGetAllApplications, candidateGetAllApplications, candidateDeleteApplication, rejectApplication, acceptApplication, getApplicationsForAJob, checkJobAppliedForCandidate, getTotalApplications, scheduleInterview };

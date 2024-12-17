@@ -2,7 +2,17 @@ const Job = require("../../models/Job");
 const Application = require("../../models/Application");
 const Task = require("../../models/Task");
 
-// Tạo task và gán cho ứng viên
+const generateUniqueId = async () => {
+  let uniqueId = Math.floor(10000000 + Math.random() * 90000000); 
+
+  const existingTask = await Task.findOne({ customId: uniqueId });
+  if (existingTask) {
+    return generateUniqueId(); 
+  }
+
+  return uniqueId;
+};
+
 const createTaskAndAssign = async (req, res) => {
   try {
     const { role } = req.user;
@@ -39,6 +49,7 @@ const createTaskAndAssign = async (req, res) => {
     const jobId = application.jobID;
 
 
+    const customId = await generateUniqueId();
 
     // Tạo task
     const newTask = new Task({
@@ -49,6 +60,7 @@ const createTaskAndAssign = async (req, res) => {
       title,
       description,
       deadline,
+      customId,
       payment: {
         amount: paymentAmount || 0, // Giá trị mặc định nếu không có
         status: "Pending",
@@ -68,6 +80,26 @@ const createTaskAndAssign = async (req, res) => {
     res
       .status(500)
       .json({ message: "Có lỗi xảy ra trong quá trình tạo nhiệm vụ!" });
+  }
+};
+
+const getASingeTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Lấy thông tin task
+    const task = await Task.findById(id)
+      .populate("jobId")
+      .populate("applicantId");
+
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    res.status(200).json({ task });
+  } catch (error) {
+    console.error("Lỗi khi lấy thông tin task:", error);
+    res.status(500).json({ message: "Có lỗi khi lấy thông tin task!" });
   }
 };
 
@@ -95,6 +127,33 @@ const getMyTaskByRecruiter = async (req, res) => {
   }
 }
 
+const getMyTaskByCandidate = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Recruiter") {
+      return res.status(400).json({
+        success: false,
+        message: "Recruiter not allowed to access this resource.",
+      });
+    }
+
+    const applicantId = req.user.id;
+
+    // Lấy danh sách task theo ứng viên
+    const tasks = await Task.find({
+      applicantId,
+    })
+      .populate("jobId")
+      .populate("employerId");
+
+    res.status(200).json({ tasks });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách task:", error);
+    res.status(500).json({ message: "Có lỗi khi lấy danh sách task!" });
+  }
+}
+
+
 const acceptTaskByCandidate = async (req, res) => {
   try {
     const { role } = req.user;
@@ -105,7 +164,7 @@ const acceptTaskByCandidate = async (req, res) => {
       });
     }
 
-    const { taskId } = req.params;
+    const { taskId } = req.body;
     const { user } = req;
 
     // Lấy thông tin task
@@ -120,7 +179,9 @@ const acceptTaskByCandidate = async (req, res) => {
     }
 
     // Cập nhật trạng thái task
-    task.payment.status = "Accepted";
+    task.payment.status = "Pending";
+    task.status = "In Progress";
+    task.startDate = new Date(Date.now());
     await task.save();
 
     res.status(200).json({ message: "Đã chấp nhận nhiệm vụ!" });
@@ -131,7 +192,7 @@ const acceptTaskByCandidate = async (req, res) => {
   }
 }
 
-const rejectTaskByCandidate = async (req, res) => {
+const denyTaskByCandidate = async (req, res) => {
   try {
     const { role } = req.user;
     if (role === "Recruiter") {
@@ -141,7 +202,7 @@ const rejectTaskByCandidate = async (req, res) => {
       });
     }
 
-    const { taskId } = req.params;
+    const { taskId } = req.body;
     const { user } = req;
 
     // Lấy thông tin task
@@ -156,13 +217,128 @@ const rejectTaskByCandidate = async (req, res) => {
     }
 
     // Cập nhật trạng thái task
-    task.payment.status = "Rejected";
+    task.payment.status = "Failed";
+    task.status = "Denied";
     await task.save();
 
     res.status(200).json({ message: "Đã từ chối nhiệm vụ!" });
 
   } catch (error) {
     console.error("Lỗi khi từ chối task:", error);
+    res.status(500).json({ message: "Có lỗi khi từ chối task!" });
+  }
+}
+
+const submitTaskByCandidate = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Recruiter") {
+      return res.status(400).json({
+        success: false,
+        message: "Recruiter not allowed to access this resource.",
+      });
+    }
+
+    const { taskId } = req.body;
+    const { submission } = req.body;
+    const { user } = req;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    // Kiểm tra xem task có phải của ứng viên không
+    if (task.applicantId.toString() !== user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Cập nhật trạng thái task
+    task.status = "Submitted";
+    task.submission = {
+      content: submission.content,
+      files: submission.files,
+      submittedAt: new Date(Date.now()),
+    };
+    await task.save();
+
+    res.status(200).json({ message: "Đã nộp nhiệm vụ thành công!" });
+
+  } catch (error) {
+    console.error("Lỗi khi submit task:", error);
+    res.status(500).json({ message: "Có lỗi khi submit task!" });
+  }
+}
+
+const approveTaskByRecruiter = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Candidate") {
+      return res.status(400).json({
+        success: false,
+        message: "Candidate not allowed to access this resource.",
+      });
+    }
+
+    const { taskId } = req.body;
+    const { user } = req;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    if (task.employerId.toString() !== user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Cập nhật trạng thái task
+    task.payment.status = "Paid";
+    task.status = "Approved";
+    await task.save();
+
+    res.status(200).json({ message: "Phê duyệt thành công!" });
+
+  } catch (error) {
+    console.error("Lỗi khi phê duyệt bài nộp:", error);
+    res.status(500).json({ message: "Có lỗi khi phê duyệt task!" });
+  }
+}
+
+const rejectTaskByRecruiter = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role === "Candidate") {
+      return res.status(400).json({
+        success: false,
+        message: "Candidate not allowed to access this resource.",
+      });
+    }
+
+    const { taskId } = req.body;
+    const { user } = req;
+
+    // Lấy thông tin task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy task!" });
+    }
+
+    if (task.employerId.toString() !== user.id) {
+      return res.status(403).json({ message: "Không thể thực hiện hành động này!" });
+    }
+
+    // Cập nhật trạng thái task
+    task.payment.status = "Failed";
+    task.status = "Rejected";
+    await task.save();
+
+    res.status(200).json({ message: "Từ chối bài nộp thành công!" });
+
+  } catch (error) {
+    console.error("Lỗi khi từ chối bài nộp:", error);
     res.status(500).json({ message: "Có lỗi khi từ chối task!" });
   }
 }
@@ -202,5 +378,54 @@ const deleteTaskByRecruiter = async (req, res) => {
 
 }
 
+const getAllTaskByAdmin = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (role !== "Admin") {
+      return res.status(400).json({
+        success: false,
+        message: "Admin is required to access this resource.",
+      });
+    }
 
-module.exports = { createTaskAndAssign, getMyTaskByRecruiter, acceptTaskByCandidate, rejectTaskByCandidate };
+    const { page = 1, limit = 20, customId, employer, status, sort = "-createdAt" } = req.query;
+
+    // Tạo bộ lọc
+    const filters = {};
+    if (customId) {
+      filters.customId = Number(customId);
+    }
+    if (employer) {
+      filters["employerId.companyName"] = { $regex: employer, $options: "i" }; // Tìm kiếm theo tên nhà tuyển dụng
+    }
+    if (status) {
+      filters.status = status;
+    }
+
+    const tasks = await Task.find(filters)
+      .populate("jobId", "title")
+      .populate("applicantId", "name")
+      .populate("employerId", "companyName avatar")
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const totalTasks = await Task.countDocuments(filters);
+
+    res.status(200).json({
+      success: true,
+      data: tasks,
+      pagination: {
+        total: totalTasks,
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalTasks / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách task:", error);
+    res.status(500).json({ message: "Có lỗi khi lấy danh sách task!" });
+  }
+};
+
+
+module.exports = { createTaskAndAssign, getMyTaskByRecruiter, acceptTaskByCandidate, denyTaskByCandidate, deleteTaskByRecruiter, getMyTaskByCandidate, getASingeTask, submitTaskByCandidate, approveTaskByRecruiter, rejectTaskByRecruiter, getAllTaskByAdmin };

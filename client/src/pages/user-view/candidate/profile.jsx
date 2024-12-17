@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import avatarDefault from "@/assets/default-user.png";
-import { PenSquareIcon, X } from "lucide-react";
+import { PenSquareIcon, ShieldCheck, X } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -16,6 +16,7 @@ const CandidateProfile = () => {
   const [skills, setSkills] = useState([]);
   const [newSkill, setNewSkill] = useState(""); // State để lưu kỹ năng mới
   const [isModalOpen, setIsModalOpen] = useState(false); // State để quản lý modal
+  const [loading, setLoading] = useState(false);
 
   const getInfo = async () => {
     try {
@@ -55,6 +56,23 @@ const CandidateProfile = () => {
       console.error("Lỗi khi cập nhật thông tin người dùng:", error);
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi cập nhật thông tin!";
       setMessage(errorMessage); // Cập nhật thông báo lỗi
+    }
+  };
+
+  const sendVerificationEmail = async () => {
+    setLoading(true);
+    setMessage('');
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/send-verification-email`, {
+        email: user.email,
+      });
+      setMessage(response.data.message); // Hiển thị thông báo từ backend
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || 'Error sending verification email.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -249,6 +267,25 @@ const removeSkill = (index) => {
             onClick={() => setIsModalOpen(true)} // Mở modal khi nhấn vào avatar
           />
           <h2 className="text-lg font-semibold ml-4">{user?.name}</h2>
+          {user?.isVerified === false ? (            
+            <div className="relative group">               
+                <ShieldCheck className="w-6 h-6 text-red-500 ml-2 cursor-pointer" onClick={sendVerificationEmail}/>
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-sm rounded-md py-2 px-3 shadow-lg z-50">
+                    Gửi email xác thực
+                </div>
+            </div>
+          ) : (
+            <div className="relative group">
+                {/* Icon */}
+               
+                <ShieldCheck className="w-6 h-6 text-green-500 ml-2" />
+
+                {/* Tooltip */}
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-sm rounded-md py-2 px-3 shadow-lg z-50">
+                    Tài khoản đã được xác thực
+                </div>
+            </div>
+          )}
         </div>
 
         {/* Toggle switch for job seeking */}
@@ -268,6 +305,9 @@ const removeSkill = (index) => {
               }`}
             ></div>
           </label>
+          
+
+          
         </div>
       </div>
 

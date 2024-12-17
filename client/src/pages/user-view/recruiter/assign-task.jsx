@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { useToast } from "@/hooks/use-toast"; // Import useToast hook
-import handleAssignTask from "@/services/task-services";
+import { handleAssignTask } from "@/services/task-services";
 import handleLockBalance from "@/services/wallet-services";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const AssignTask = () => {
   const { id } = useParams(); // Lấy applicationId từ params
@@ -11,6 +12,7 @@ const AssignTask = () => {
   const applicationId = id;
   const navigate = useNavigate();
   const { toast } = useToast(); // Use the toast hook inside the component
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [taskData, setTaskData] = useState({
     title: "",
@@ -37,6 +39,8 @@ const AssignTask = () => {
       });
       return;
     }
+
+    
 
     const task = {
       applicationId,
@@ -134,12 +138,21 @@ const AssignTask = () => {
           </button>
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={handleSubmit}
+            onClick={() => setIsModalOpen(true)}
           >
             Giao việc
           </button>
         </div>
+
       </div>
+      {isModalOpen && (
+        <ConfirmModal
+          title="Xác nhận"
+          content={`Xác nhận khóa ${taskData.paymentAmount.toLocaleString()} VNĐ trong ví để tạo nhiệm vụ này?`}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={handleSubmit}
+        />
+      )}
     </div>
   );
 };

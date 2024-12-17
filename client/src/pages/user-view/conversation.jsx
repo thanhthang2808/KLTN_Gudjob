@@ -4,7 +4,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { checkAuth } from "@/store/auth-slice";
 import chatImage from "@/assets/chat-image.png";
-import io from "socket.io-client"; // Import Socket.io Client
+import io from "socket.io-client";
 import { Ellipsis, PlusCircle } from "lucide-react";
 import { getOtherPersonInfoInConversation } from "@/services/chat-service";
 
@@ -13,10 +13,9 @@ const ConversationPage = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [otherPersonsInfo, setOtherPersonsInfo] = useState({});
-  const [conversation, setConversation] = useState([]);
-  const [conversations, setConversations] = useState([]); // Danh sách các cuộc trò chuyện
+  const [unreadMessages, setUnreadMessages] = useState({});
+  const [conversations, setConversations] = useState([]);
 
-  // Lấy thông tin người dùng từ Redux store
   const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.auth
   );
@@ -24,21 +23,32 @@ const ConversationPage = () => {
   const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
   const dispatch = useDispatch();
 
-  // Reference để cuộn đến cuối cùng của tin nhắn
   const messagesEndRef = useRef(null);
-
-  // Kết nối đến Socket.io Server
   const socket = useRef(null);
 
-  // Kiểm tra trạng thái đăng nhập và gọi checkAuth nếu người dùng chưa đăng nhập
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      dispatch(checkAuth()); // Kiểm tra trạng thái xác thực
+      dispatch(checkAuth());
     }
   }, [isAuthenticated, isLoading, dispatch]);
 
   useEffect(() => {
-    // Lấy danh sách các cuộc trò chuyện khi component mount
+    const fetchUnreadMessages = async () => {
+      try {
+        const { data } = await axios.get(
+          `${API_URL}/api/chat/unread-messages`,
+          { withCredentials: true }
+        );
+        setUnreadMessages(data.conversationUnread);
+      } catch (error) {
+        console.error("Lỗi khi lấy số tin nhắn chưa đọc:", error);
+      }
+    };
+
+    fetchUnreadMessages();
+  }, [conversations]);
+
+  useEffect(() => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get(
@@ -61,7 +71,7 @@ const ConversationPage = () => {
       const infoMap = {};
       for (const conversation of conversations) {
         const data = await getOtherPersonInfoInConversation(conversation._id);
-        infoMap[conversation._id] = data.otherPersonInfo; // Lưu trữ thông tin
+        infoMap[conversation._id] = data.otherPersonInfo;
       }
       setOtherPersonsInfo(infoMap);
     };
@@ -70,7 +80,6 @@ const ConversationPage = () => {
   }, [conversations]);
 
   useEffect(() => {
-    // Lấy danh sách tin nhắn khi conversationId thay đổi
     const fetchMessages = async () => {
       try {
         const { data } = await axios.get(
@@ -79,8 +88,9 @@ const ConversationPage = () => {
         );
         if (Array.isArray(data)) {
           setMessages(data);
+          await markAllAsRead(conversationId);
         } else {
-          setMessages([]); // Gán giá trị mặc định nếu không phải mảng
+          setMessages([]);
         }
       } catch (error) {
         console.error("Lỗi khi tải tin nhắn:", error);
@@ -93,69 +103,84 @@ const ConversationPage = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    // Thiết lập kết nối đến Socket.io khi component được render
     socket.current = io(API_URL, { withCredentials: true });
 
-    // Khi kết nối thành công, thông báo với server về người dùng
     if (user?.id) {
-      socket.current.emit("addUser", user.id); // Thông báo server về người dùng
+      socket.current.emit("addUser", user.id);
     }
 
-    // Lắng nghe tin nhắn mới từ server
     socket.current.on(`message_${conversationId}`, (newMessage) => {
       console.log("Received new message:", newMessage);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
     return () => {
-      socket.current.disconnect(); // Ngắt kết nối khi component unmount
+      socket.current.disconnect();
     };
   }, [conversationId, user?.id]);
 
   useEffect(() => {
-    // Cuộn xuống dưới cùng khi có tin nhắn mới
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
+  const markAllAsRead = async (conversationId) => {
+    try {
+      await axios.put(
+        `${API_URL}/api/chat/messages/read`,
+        { conversationId, userId: user?.id },
+        { withCredentials: true }
+      );
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.readBy.includes(user?.id)
+            ? msg
+            : { ...msg, readBy: [...msg.readBy, user?.id] }
+        )
+      );
+    } catch (error) {
+      console.error("Lỗi khi đánh dấu tất cả tin nhắn là đã đọc:", error);
+    }
+  };
+
   const sendMessage = async () => {
     try {
-      if (!newMessage.trim()) return; // Đảm bảo không gửi tin nhắn rỗng
+      if (!newMessage.trim()) return;
 
       const message = {
         conversationId,
         content: newMessage,
-        sender: user?.id, // ID người gửi tin nhắn
+        sender: user?.id,
       };
 
-      // Gửi tin nhắn qua socket đến server
       socket.current.emit("sendMessage", message);
 
-      // Cập nhật tin nhắn ngay lập tức ở phía client
       setMessages((prev) => [...prev, { ...message, createdAt: new Date() }]);
 
-      setNewMessage(""); // Xóa nội dung tin nhắn sau khi gửi
+      setNewMessage("");
     } catch (error) {
       console.error("Lỗi khi gửi tin nhắn:", error);
     }
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; // Hiển thị loading khi đang kiểm tra trạng thái đăng nhập
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    return <div>Not authenticated</div>; // Hiển thị thông báo nếu người dùng chưa đăng nhập
+    return <div>Not authenticated</div>;
   }
 
   return (
     <div className="flex h-screen w-screen">
-      {/* Bên trái - Danh sách cuộc trò chuyện */}
       <div className="w-1/4 bg-gray-800 text-white p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Cuộc trò chuyện</h1>
-          <Link to={`/${user.role.toLowerCase()}/home`} className="text-blue-400 hover:text-white">
-      Về trang chủ
-    </Link>
+          <Link
+            to={`/${user.role.toLowerCase()}/home`}
+            className="text-blue-400 hover:text-white"
+          >
+            Về trang chủ
+          </Link>
         </div>
         <ul className="space-y-3">
           <div className="flex items-center justify-between mb-4">
@@ -176,21 +201,50 @@ const ConversationPage = () => {
                 conversationId === conversation._id ? "bg-gray-700" : ""
               }`}
             >
-              <Link to={`/conversation/${conversation._id}`}>
-                <div className={`flex items-center hover:text-white ${
-                conversationId === conversation._id ? "text-white" : ""
-              }`}>
-                  <img
-                    src={otherPersonsInfo[conversation._id]?.avatar?.url}
-                    alt="Avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div className="ml-3">
-                    <h3 className="font-semibold">
-                      {otherPersonsInfo[conversation._id]?.companyName ||
-                        otherPersonsInfo[conversation._id]?.name || "Username"}
-                    </h3>
+              <Link
+                to={`/conversation/${conversation._id}`}
+                onClick={() =>
+                  setUnreadMessages((prev) => ({
+                    ...prev,
+                    [conversation._id]: 0,
+                  }))
+                }
+              >
+                <div
+                  className={`flex items-center justify-between ${
+                    conversationId === conversation._id ? "text-white" : ""
+                  }`}
+                >
+                  <div className="flex items-center flex-grow">
+                    <img
+                      src={otherPersonsInfo[conversation._id]?.avatar?.url}
+                      alt="Avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <div className="ml-3">
+                      <h3 className="font-semibold">
+                        {otherPersonsInfo[conversation._id]?.companyName ||
+                          otherPersonsInfo[conversation._id]?.name ||
+                          "Username"}
+                      </h3>
+                      {/* <p
+                        className={`text-sm ${
+                          unreadMessages[conversation._id] > 0
+                            ? "text-white"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {conversation.lastMessage}
+                      </p> */}
+                    </div>
                   </div>
+                  {unreadMessages[conversation._id] > 0 && (
+                    <div className="flex items-center justify-end flex-shrink-0">
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                        {unreadMessages[conversation._id]}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </Link>
             </li>
@@ -198,9 +252,7 @@ const ConversationPage = () => {
         </ul>
       </div>
 
-      {/* Bên phải - Cửa sổ nhắn tin */}
       <div className="flex-1 max-h-screen bg-white p-6 flex flex-col">
-        {/* Hiển thị màn hình chào mừng nếu chưa chọn cuộc trò chuyện */}
         {!conversationId ? (
           <div className="flex flex-col items-center justify-center h-full">
             <img src={chatImage} alt="Chat" className="w-32 h-32 mb-4" />
@@ -226,7 +278,9 @@ const ConversationPage = () => {
                     otherPersonsInfo[conversationId]?.name}
                 </h3>
                 <p className="text-gray-500">
-                  {otherPersonsInfo[conversationId]?.companyName ? "Nhà tuyển dụng" : "Ứng viên"}{" "}
+                  {otherPersonsInfo[conversationId]?.companyName
+                    ? "Nhà tuyển dụng"
+                    : "Ứng viên"}{" "}
                 </p>
               </div>
               <Ellipsis size={25} className="ml-auto cursor-pointer" />
@@ -238,7 +292,7 @@ const ConversationPage = () => {
                     const isNewDay =
                       index === 0 ||
                       new Date(msg.createdAt).toDateString() !==
-                        new Date(messages[index - 1]?.createdAt).toDateString(); // Kiểm tra ngày mới
+                        new Date(messages[index - 1]?.createdAt).toDateString();
 
                     return (
                       <React.Fragment key={msg?._id || index}>
@@ -289,11 +343,10 @@ const ConversationPage = () => {
                     Không có tin nhắn nào.
                   </p>
                 )}
-                <div ref={messagesEndRef} /> {/* Cuộn đến cuối cùng */}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 
-            {/* Input và gửi tin nhắn */}
             <div className="mt-4 p-4 bg-white shadow-md flex items-center rounded-lg">
               <input
                 value={newMessage}

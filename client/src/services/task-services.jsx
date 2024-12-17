@@ -12,24 +12,56 @@ const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
  * @param {number} taskData.paymentAmount - Số tiền thanh toán cho task
  * @returns {Promise<Object>} - Trả về dữ liệu task vừa được tạo
  */
-const handleAssignTask = async (taskData, toast) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/task/create-task`, taskData, {
+export const handleAssignTask = async (taskData, toast) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/task/create-task`,
+      taskData,
+      {
         withCredentials: true,
-      });
-      toast({
-        title: "Nhiệm vụ đã được tạo và gán thành công!",
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Lỗi khi tạo và gán nhiệm vụ:", error.response?.data || error);
-      toast({
-        title: "Có lỗi xảy ra khi tạo và gán nhiệm vụ!",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-  
+      }
+    );
+    toast({
+      title: "Nhiệm vụ đã được tạo và gán thành công!",
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Lỗi khi tạo và gán nhiệm vụ:",
+      error.response?.data || error
+    );
+    toast({
+      title: "Có lỗi xảy ra khi tạo và gán nhiệm vụ!",
+      variant: "destructive",
+    });
+    throw error;
+  }
+};
 
-export default handleAssignTask;
+export const handleAcceptTaskByCandidate = async (taskId, toast) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/task/accept-task`,
+      taskId,
+      {
+        withCredentials: true,
+      }
+    );
+    toast({
+      title: "Nhận nhiệm vụ thành công!",
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Lỗi khi tạo và gán nhiệm vụ:",
+      error.response?.data || error
+    );
+    toast({
+      title: "Có lỗi xảy ra khi tạo và gán nhiệm vụ!",
+      variant: "destructive",
+    });
+    throw error;
+  }
+};
+
+

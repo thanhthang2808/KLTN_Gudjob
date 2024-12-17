@@ -28,6 +28,11 @@ const TaskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    customId: {
+        type: Number,
+        unique: true,
+        trim: true,
+      },
 
     // Tiêu đề nhiệm vụ
     title: {
@@ -46,14 +51,13 @@ const TaskSchema = new mongoose.Schema(
     // Trạng thái nhiệm vụ
     status: {
       type: String,
-      enum: ["Assigned", "In Progress", "Completed", "Approved", "Rejected"],
+      enum: ["Assigned", "Denied", "In Progress", "Submitted", "Overdue", "Approved", "Rejected"],
       default: "Assigned",
     },
 
     // Ngày bắt đầu và ngày kết thúc
     startDate: {
       type: Date,
-      default: Date.now,
     },
     deadline: {
       type: Date,
@@ -103,8 +107,8 @@ const TaskSchema = new mongoose.Schema(
       },
       status: {
         type: String,
-        enum: ["Pending", "Paid"],
-        default: "Pending",
+        enum: ["Pending", "Paid", "Failed"],
+        default: "",
       },
       paidAt: Date,
     },
@@ -114,4 +118,5 @@ const TaskSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Task", TaskSchema);
+const Task = mongoose.model("Task", TaskSchema);
+module.exports = Task;

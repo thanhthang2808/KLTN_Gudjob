@@ -25,8 +25,19 @@ const getAllRecommendJobs = async (req, res) => {
     }
     const userSkills = user.skills; // Giả định 'skills' là mảng kỹ năng của người dùng
 
+    const { page = 1, limit = 9 } = req.query; // Lấy page và limit từ query parameters
+    const skip = (page - 1) * limit;
+
     // Tìm các công việc có kỹ năng yêu cầu trùng với kỹ năng của người dùng
     const jobs = await Job.find({
+      expired: false,
+      status: "Approved",
+      requiredSkills: { $in: userSkills },
+    })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalJobs = await Job.countDocuments({
       expired: false,
       status: "Approved",
       requiredSkills: { $in: userSkills },
@@ -35,11 +46,14 @@ const getAllRecommendJobs = async (req, res) => {
     res.status(200).json({
       success: true,
       jobs,
+      totalJobs,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
+
 
 const getNumberOfJobs = async (req, res) => {
   try {
@@ -183,6 +197,19 @@ const getMyJobs = async (req, res) => {
   }
 };
 
+const getJobsPostedByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = await Job.find({ postedBy: id });
+    res.status(200).json({
+      success: true,
+      jobs,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 // export const updateJob = async (req, res) => {
 //   try {
 //     const { role } = req.user;
@@ -300,9 +327,16 @@ const updateJobStatus = async (req, res) => {
 
 const getSearchResults = async (req, res) => {
   try {
-    const { searchQuery, selectedCategories, location, workType } = req.query;
+    const { searchQuery, selectedCategories, location, workType, page = 1, limit = 10 } = req.query;
 
-    // Tạo một đối tượng điều kiện tìm kiếm
+    // Chuyển đổi tham số limit thành số nguyên
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+
+    // Tính toán số lượng công việc cần bỏ qua (skip)
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Tạo đối tượng điều kiện tìm kiếm
     const searchConditions = {};
 
     // Kiểm tra và áp dụng điều kiện tìm kiếm theo tiêu đề công việc
@@ -319,21 +353,33 @@ const getSearchResults = async (req, res) => {
     if (location && location !== "Khác") {
       searchConditions.city = location;
     }
-    
+
+    // Kiểm tra và áp dụng điều kiện tìm kiếm theo loại công việc
     if (workType && workType !== "Tất cả") {
       searchConditions.workType = workType;
     }
 
-    searchConditions.expired = false;
+    // Các điều kiện mặc định (để lọc các công việc chưa hết hạn và đã được duyệt)
     searchConditions.status = "Approved";
 
-    // Thực hiện tìm kiếm công việc trong cơ sở dữ liệu
-    const jobs = await Job.find(searchConditions);
+    // Thực hiện tìm kiếm công việc trong cơ sở dữ liệu với phân trang
+    const jobs = await Job.find(searchConditions)
+      .skip(skip) // Bỏ qua các công việc theo trang
+      .limit(limitNumber); // Giới hạn số lượng công việc trả về
 
+    // Lấy tổng số công việc phù hợp với điều kiện tìm kiếm
+    const totalJobs = await Job.countDocuments(searchConditions);
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalJobs / limitNumber);
+
+    // Trả về kết quả tìm kiếm cùng với thông tin phân trang
     res.status(200).json({
       success: true,
       message: "Search Results",
       jobs,
+      totalJobs,
+      totalPages,
     });
   } catch (error) {
     console.error(error);
@@ -343,6 +389,95 @@ const getSearchResults = async (req, res) => {
     });
   }
 };
+
+const addToSavedJobs = async (req, res) => {
+  try {
+    const { jobId } = req.body;
+    const { id } = req.user;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+
+    if (user.savedJobs.includes(jobId)) {
+      return res.status(400).json({ success: false, message: "Job already saved" });
+    }
+
+    user.savedJobs.push(jobId);
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Job saved successfully" });
+    console.log("Job saved successfully");
+
+  } catch (error) {
+
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const removeFromSavedJobs = async (req, res) => {
+  try {
+    const { jobId } = req.body;
+    const { id } = req.user;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+
+    if (!user.savedJobs.includes(jobId)) {
+      return res.status(400).json({ success: false, message: "Job not saved" });
+    }
+
+    user.savedJobs = user.savedJobs.filter((savedJob) => savedJob.toString() !== jobId);
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Job removed from saved jobs" });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+}
+
+const getSavedJobs = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const user = await User.findById(id).populate({
+      path: 'savedJobs',
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const totalJobs = user.savedJobs.length;  // Get the total number of saved jobs
+
+    res.status(200).json({
+      success: true,
+      savedJobs: user.savedJobs,
+      totalJobs,
+    });
+
+  } catch (error) {
+    console.error("Error fetching saved jobs:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 
 module.exports = {
   getAllJobs,
@@ -355,4 +490,8 @@ module.exports = {
   getSearchResults,
   getPendingJobs,
   updateJobStatus,
+  addToSavedJobs,
+  removeFromSavedJobs,
+  getSavedJobs,
+  getJobsPostedByUser,
 };

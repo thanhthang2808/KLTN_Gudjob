@@ -34,6 +34,7 @@ export const loginUser = createAsyncThunk(
         withCredentials: true,
       }
     );
+    console.log(API_URL);
     return response.data;
   }
 );
