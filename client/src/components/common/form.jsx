@@ -105,7 +105,7 @@ function CommonForm({
   }
 
   useEffect(() => {
-    if (buttonText === "Sign up") {
+    if (buttonText === "Đăng ký") {
       setAcceptTerms(false);
     }
   }, [buttonText]);
@@ -121,18 +121,18 @@ function CommonForm({
         ))}
       </div>
 
-      {buttonText === "Sign in" && (
+      {buttonText === "Đăng nhập" && (
         <div className="text-right mb-1 mt-1">
           <a
             href="/forgot-password"
             className="text-sm text-blue-500 hover:underline"
           >
-            Forgot password?
+            Quên mật khẩu
           </a>
         </div>
       )}
 
-      {buttonText === "Sign up" && (
+      {buttonText === "Đăng ký" && (
         <div className="mt-4">
           <div className="text-right mb-1 mt-1">
             {/* Additional sign-up specific fields can go here */}
@@ -147,10 +147,10 @@ function CommonForm({
                 className="mr-2"
               />
               <span className="text-sm text-gray-700">
-                I accept the{" "}
+                Tôi đồng ý với{" "}
                 <a href="/terms-and-conditions" className="text-blue-500 hover:underline">
-                  terms and conditions
-                </a>
+                  chính sách điều khoản và điều kiện
+                </a> của Gudjob.
               </span>
             </label>
           </div>

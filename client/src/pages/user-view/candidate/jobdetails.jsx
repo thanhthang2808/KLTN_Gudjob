@@ -14,7 +14,8 @@ import level from "@/assets/level.svg";
 import numberpeople from "@/assets/numberpeople.svg";
 import job from "@/assets/job.svg";
 import gender from "@/assets/gender.svg";
-import { Check } from "lucide-react";
+import { CalendarX2, Check } from "lucide-react";
+import { HeartFilled, HeartOutlined } from "@ant-design/icons";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -26,6 +27,8 @@ function JobDetails() {
   const [posterInfo, setPosterInfo] = useState(null);
   const [error, setError] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const navigateTo = useNavigate();
 
   const getInfo = async () => {
@@ -34,6 +37,7 @@ function JobDetails() {
         withCredentials: true,
       });
       setUser(response.data.user);
+      setSavedJobs(response.data.user.savedJobs);
     } catch (error) {
       console.error("Lỗi khi lấy thông tin người dùng:", error);
     }
@@ -76,7 +80,19 @@ function JobDetails() {
             .catch((error) => {
               console.error("Error fetching poster info:", error);
             });
+          axios
+            .get(`${API_URL}/api/review/get-reviews/${res.data.job.postedBy}`, {
+              withCredentials: true,
+            })
+            .then((res) => {
+              setReviews(res.data.reviews);
+              console.log(res.data.reviews);
+            })
+            .catch((error) => {
+              console.error("Error fetching reviews:", error);
+            });
         }
+        
       })
       .catch(() => {
         setError(true);
@@ -84,6 +100,34 @@ function JobDetails() {
         navigateTo("/not-found");
       });
   }, [id, navigateTo]);
+
+  const handleSaveJob = async (jobId) => {
+    if (savedJobs.includes(jobId)) {
+      // If job is already saved, unsave it
+      try {
+        await axios.post(
+          `${API_URL}/api/job/unsave-job`,
+          { jobId },
+          { withCredentials: true }
+        );
+        setSavedJobs(savedJobs.filter((job) => job !== jobId)); // Update savedJobs state
+      } catch (error) {
+        console.error("Error unsaving job:", error);
+      }
+    } else {
+      // If job is not saved, save it
+      try {
+        await axios.post(
+          `${API_URL}/api/job/save-job`,
+          { jobId },
+          { withCredentials: true }
+        );
+        setSavedJobs([...savedJobs, jobId]); // Update savedJobs state
+      } catch (error) {
+        console.error("Error saving job:", error);
+      }
+    }
+  };
 
   const calculateMatchPercentage = (requiredSkills = [], userSkills = []) => {
     // Ensure both requiredSkills and userSkills are arrays
@@ -184,17 +228,40 @@ function JobDetails() {
                   <Check className="ml-2" size={24} />
                 </div>
               ) : (
-                <Link
-                  to={`/candidate/application/${job._id}`}
-                  className="flex items-center justify-center bg-green-500 text-white font-bold py-2 px-4 rounded"
-                >
-                  <img src={share} alt="share" className="w-5 h-5 mr-2" />
-                  Ứng tuyển ngay
-                </Link>
+                <div>
+                  {!job.expired ? (
+                    <Link
+                      to={`/candidate/application/${job._id}`}
+                      className="flex items-center justify-center bg-green-500 text-white font-bold py-2 px-4 rounded"
+                    >
+                      <img src={share} alt="share" className="w-5 h-5 mr-2" />
+                      Ứng tuyển ngay
+                    </Link>
+                  ) : (
+                    <div className="flex items-center bg-gray-100 justify-center text-red-500 font-bold py-2 px-4 rounded">
+                      <CalendarX2 className="mr-2" size={22} />
+                      Hết hạn ứng tuyển
+                    </div>
+                  )}
+                </div>
               )}
-              <button className="flex items-center bg-white justify-center border border-green-500 text-green-500 py-2 px-4 rounded">
-                <img src={heartgreen} alt="save" className="w-5 h-5 mr-2" />
-                Lưu tin
+              <button
+                onClick={() => handleSaveJob(job._id)}
+                className={`text-white py-2 px-4 rounded ${
+                  savedJobs.includes(job._id)
+                    ? "bg-white hover:bg-red-300"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {savedJobs.includes(job._id) ? (
+                  <div className="text-red-600">
+                    <HeartFilled /> Đã lưu
+                  </div>
+                ) : (
+                  <div className="text-white">
+                    <HeartOutlined /> Lưu
+                  </div>
+                )}
               </button>
             </div>
           </div>
@@ -205,14 +272,6 @@ function JobDetails() {
               <h3 className="text-lg font-semibold">Mô tả công việc</h3>
               <p>{job.description || "Không có mô tả công việc cho tin này"}</p>
             </div>
-            {/* <div>
-              <h3 className="text-lg font-semibold">Yêu cầu ứng viên</h3>
-              <p>- Chăm chỉ, cẩn thận</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Quyền lợi</h3>
-              <p>- Hưởng nguyên lương trong thời gian thử việc.</p>
-            </div> */}
             <div>
               <h3 className="text-lg font-semibold mt-2">Địa điểm làm việc</h3>
               <p>{job.location}</p>
@@ -226,15 +285,14 @@ function JobDetails() {
                 Cách thức ứng tuyển
               </h3>
               <p>
-                Sinh viên ứng tuyển bằng cách bấm <strong>Ứng tuyển</strong>{" "}
-                dưới đây
+                Sinh viên ứng tuyển bằng cách bấm{" "}
+                <strong>Ứng tuyển ngay</strong>{" "}
               </p>
-              <button className="bg-green-500 text-white py-2 px-4 rounded mt-4">
-                Ứng tuyển
-              </button>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mt-6">Việc làm liên quan</h3>
+              <h3 className="text-lg font-semibold mt-6">
+                Đánh giá nhà tuyển dụng
+              </h3>
             </div>
           </div>
         </div>
@@ -251,12 +309,12 @@ function JobDetails() {
                 {posterInfo?.companyName || "Tên công ty"}
               </h2>
             </div>
-            <div className="text-gray-700 mb-2">Quy mô: 10-24 nhân viên</div>
-            <div className="text-gray-700 mb-2">Lĩnh vực: IT</div>
+            <div className="text-gray-700 mb-2">Quy mô: {posterInfo?.numberOfEmployees || "Chưa cập nhật"}</div>
+            <div className="text-gray-700 mb-2">Lĩnh vực: {posterInfo?.industry || "Chưa cập nhật"}</div>
             <div className="text-gray-700 mb-2">
               Địa chỉ: {posterInfo?.address || "Địa chỉ công ty"}
             </div>
-            <Link to="#" className="text-green-500">
+            <Link to={`/candidate/company/${posterInfo?._id}`} className="text-green-500">
               Xem trang công ty
             </Link>
           </div>

@@ -73,6 +73,21 @@ const applicationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  interviewTime: {
+    type: Date,
+    required: false, 
+  },
+  interviewConfirmed: {
+    type: String,
+    enum: ["Yes", "No", "Pending"],
+    default: "Pending",
+    required: false, 
+  },
+  interviewAddress: {
+    type: String,
+    required: false, 
+  },
 });
 
-module.exports = mongoose.model("Application", applicationSchema);
+const Application = mongoose.model("Application", applicationSchema);
+module.exports = Application;

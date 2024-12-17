@@ -26,6 +26,17 @@ function AuthRegister() {
 
   function onSubmit(event) {
     event.preventDefault();
+
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
+      setError("All fields are required");
+      return;
+    }
+
+    if (formData.email.indexOf("@") === -1) {
+      setError("Invalid email address");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Confirm password is incorrect");
       return;
@@ -58,15 +69,15 @@ function AuthRegister() {
     dynamicFormControls.push(
       {
         name: "companyName",
-        label: "Company Name",
-        placeholder: "Enter your company name",
+        label: "Tên công ty",
+        placeholder: "Nhập tên công ty",
         componentType: "input",
         type: "text",
       },
       {
         name: "address",
-        label: "Address",
-        placeholder: "Enter your company address",
+        label: "Địa chỉ",
+        placeholder: "Nhập địa chỉ công ty",
         componentType: "input",
         type: "text",
       }
@@ -77,15 +88,15 @@ function AuthRegister() {
     <div className="mx-auto w-full max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Create new account
+          Tạo tài khoản mới
         </h1>
         <p className="mt-2">
-          Already have an account
+          Đã có tài khoản?
           <Link
             className="font-medium ml-2 text-primary hover:underline"
             to="/auth/login"
           >
-            Sign in
+            Đăng nhập
           </Link>
         </p>
       </div>
@@ -98,7 +109,7 @@ function AuthRegister() {
 
       <CommonForm
         formControls={dynamicFormControls}
-        buttonText={"Sign up"}
+        buttonText={"Đăng ký"}
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}

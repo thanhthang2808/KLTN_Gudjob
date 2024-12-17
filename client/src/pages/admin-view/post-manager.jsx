@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import anhmau from "@/assets/anhmau.png"; // Default avatar if not available
 import { useNavigate } from "react-router-dom";
+import { Check, Text, Trash2, X } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -10,11 +11,13 @@ function PostManagement() {
   const [avatars, setAvatars] = useState({});
   const [companyNames, setCompanyNames] = useState({});
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 20;
   const navigate = useNavigate();
 
-  // Fetch jobs and user details (company name, avatar)
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
@@ -24,33 +27,40 @@ function PostManagement() {
         });
         const jobData = response.data.jobs;
 
-        // Fetch user details for each job
         const userPromises = jobData.map((job) =>
           axios
-            .get(`${API_URL}/api/user/${job.postedBy}`, { withCredentials: true })
+            .get(`${API_URL}/api/user/${job.postedBy}`, {
+              withCredentials: true,
+            })
             .then((userResponse) => {
               const avatarUrl = userResponse.data.user.avatar?.url || anhmau;
-              const companyName = userResponse.data.user.companyName || "Company Name";
-              return { id: job._id, avatar: avatarUrl, companyName: companyName };
+              const companyName =
+                userResponse.data.user.companyName || "Company Name";
+              return {
+                id: job._id,
+                avatar: avatarUrl,
+                companyName: companyName,
+              };
             })
             .catch((error) => {
               console.error("Error fetching user details:", error);
-              return { id: job._id, avatar: anhmau, companyName: "Company Name" };
+              return {
+                id: job._id,
+                avatar: anhmau,
+                companyName: "Company Name",
+              };
             })
         );
 
-        // Wait for all user details to be fetched
         const userData = await Promise.all(userPromises);
         const avatarMap = {};
         const companyMap = {};
 
-        // Organize user data by job ID
         userData.forEach(({ id, avatar, companyName }) => {
           avatarMap[id] = avatar;
           companyMap[id] = companyName;
         });
 
-        // Update state with jobs and user details
         setPosts(jobData);
         setAvatars(avatarMap);
         setCompanyNames(companyMap);
@@ -66,10 +76,27 @@ function PostManagement() {
 
   const handleApprove = async (id) => {
     try {
-      await axios.put(`${API_URL}/api/job/${id}/status`, { status: "Approved" }, { withCredentials: true });
+      await axios.put(
+        `${API_URL}/api/job/${id}/status`,
+        { status: "Approved" },
+        { withCredentials: true }
+      );
       setPosts(posts.filter((post) => post._id !== id));
     } catch (error) {
       console.error("Error approving job:", error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await axios.put(
+        `${API_URL}/api/job/${id}/status`,
+        { status: "Rejected" },
+        { withCredentials: true }
+      );
+      setPosts(posts.filter((post) => post._id !== id));
+    } catch (error) {
+      console.error("Error rejecting job:", error);
     }
   };
 
@@ -78,56 +105,81 @@ function PostManagement() {
   };
 
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+    setSearchQuery(event.target.value.toLowerCase());
   };
 
   const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value);
+    setFilterStatus(event.target.value);
   };
 
-  // Filter posts based on search and status filter
+  const handleSortOrderChange = (event) => {
+    setSortOrder(event.target.value);
+  };
+
   const filteredPosts = posts.filter((post) => {
-    const matchesSearchQuery = post.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatusFilter = statusFilter ? post.status === statusFilter : true;
-    return matchesSearchQuery && matchesStatusFilter;
+    const searchTarget = `${post.title} ${companyNames[post._id]}`.toLowerCase();
+    const matchesSearch = searchTarget.includes(searchQuery);
+    const matchesStatus = filterStatus ? post.status === filterStatus : true;
+    return matchesSearch && matchesStatus;
   });
 
-  // Sort posts by most recent date
   const sortedPosts = filteredPosts.sort((a, b) => {
-    return new Date(b.jobPostedOn) - new Date(a.jobPostedOn); // Descending order (most recent first)
+    return sortOrder === "asc"
+      ? new Date(a.jobPostedOn) - new Date(b.jobPostedOn)
+      : new Date(b.jobPostedOn) - new Date(a.jobPostedOn);
   });
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
+
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý bài đăng</h1>
-        <p className="text-gray-500">Duyệt, chỉnh sửa và xóa các bài đăng từ người dùng.</p>
+        <p className="text-gray-500">
+          Duyệt, chỉnh sửa và xóa các bài đăng từ người dùng.
+        </p>
       </header>
 
-      {/* Search and Filter */}
       <div className="flex justify-between mb-6">
-        {/* Search Bar */}
-        <div className="w-1/2">
+        <div className="w-1/3">
           <input
             type="text"
-            placeholder="Tìm kiếm công việc"
+            placeholder="Tìm kiếm theo công việc hoặc công ty"
             value={searchQuery}
             onChange={handleSearchChange}
             className="p-2 w-full border rounded-lg"
           />
         </div>
 
-        {/* Status Filter */}
         <div className="w-1/4">
           <select
             onChange={handleStatusFilterChange}
-            value={statusFilter}
+            value={filterStatus}
             className="p-2 w-full border rounded-lg"
           >
             <option value="">Tất cả trạng thái</option>
-            <option value="Pending">Chờ duyệt</option>
+            <option value="Pending">Đang chờ</option>
             <option value="Approved">Đã duyệt</option>
-            <option value="Rejected">Từ chối</option>
+            <option value="Rejected">Đã từ chối</option>
+          </select>
+        </div>
+
+        <div className="w-1/4">
+          <select
+            onChange={handleSortOrderChange}
+            value={sortOrder}
+            className="p-2 w-full border rounded-lg"
+          >
+            <option value="desc">Sắp xếp theo ngày: Mới nhất</option>
+            <option value="asc">Sắp xếp theo ngày: Cũ nhất</option>
           </select>
         </div>
       </div>
@@ -148,10 +200,12 @@ function PostManagement() {
               </tr>
             </thead>
             <tbody>
-              {sortedPosts.length > 0 ? (
-                sortedPosts.map((post) => (
+              {currentPosts.length > 0 ? (
+                currentPosts.map((post) => (
                   <tr key={post._id} className="hover:bg-gray-100 border-b">
-                    <td className="px-6 py-4 font-medium text-gray-800">{post.title}</td>
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {post.title}
+                    </td>
                     <td className="px-6 py-4 flex items-center space-x-3">
                       <img
                         src={avatars[post._id] || anhmau}
@@ -165,14 +219,54 @@ function PostManagement() {
                       {new Date(post.jobPostedOn).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-sm ${post.status === 'Pending' ? 'bg-yellow-100 text-yellow-600' : post.status === 'Approved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          post.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : post.status === "Approved"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
                         {post.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <button className="text-blue-500 hover:text-blue-600 mr-2" onClick={() => handleViewDetails(post._id)}>Chi tiết</button>
-                      <button className="text-green-500 hover:text-green-600 mr-2" onClick={() => handleApprove(post._id)}>Duyệt</button>
-                      <button className="text-red-500 hover:text-red-600">Xóa</button>
+                    <td className="px-2 py-1">
+                      <div className="flex items-center justify-center space-x-2">
+                        <button
+                          className="flex items-center bg-white justify-center px-3 py-1 text-sm font-medium text-blue-500 border border-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200"
+                          onClick={() => handleViewDetails(post._id)}
+                        >
+                          <Text />
+                          <span className="ml-1">View</span>
+                        </button>
+                        {post.status === "Pending" && (
+                          <div className="flex items-center justify-center space-x-2">
+                            <button
+                            className="flex items-center bg-white justify-center px-3 py-1 text-sm font-medium text-green-500 border border-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200"
+                            onClick={() => handleApprove(post._id)}
+                          >
+                            <Check />
+                          </button>
+                          <button
+                            className="flex items-center bg-white justify-center px-3 py-1 text-sm font-medium text-red-500 border border-red-500 rounded hover:bg-red-500 hover:text-white transition-colors duration-200"
+                            onClick={() => handleReject(post._id)}
+                          >
+                            <X />
+                          </button>
+                          </div>
+                        )}
+                        {post.status !== "Pending" && (
+                          <div className="flex items-center justify-center space-x-2">
+                            <button
+                            className="flex items-center bg-white justify-center px-3 py-1 text-sm font-medium text-red-500 border border-red-500 rounded hover:bg-red-500 hover:text-white transition-colors duration-200"
+                            onClick={() => handleReject(post._id)}
+                          >
+                            <Trash2 />
+                          </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -187,6 +281,26 @@ function PostManagement() {
           </table>
         </div>
       )}
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="px-4 py-2 border rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+        >
+          Trang trước
+        </button>
+        <span className="text-gray-700">
+          Trang {currentPage} / {totalPages}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="px-4 py-2 border rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+        >
+          Trang sau
+        </button>
+      </div>
     </div>
   );
 }

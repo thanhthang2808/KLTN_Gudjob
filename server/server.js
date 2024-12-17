@@ -14,9 +14,13 @@ const applicationRoutes = require("./routes/job/application-routes");
 const walletRoutes = require("./routes/user/wallet-routes");
 const chatRoutes = require("./routes/chat-notification/chat-routes");
 const taskRoutes = require("./routes/task/task-routes");
+const reviewRoutes = require("./routes/review/review-routes");
+const reportRoutes = require("./routes/report/report-routes");
+const testRoutes = require("./routes/test/test-routes");
 const { paymentHandler } = require("./controllers/payment/payment");
 const Message = require("./models/Message");
 const Conversation = require("./models/Conversation");
+const startAgenda = require("./controllers/chat-notification/agenda-controller");
 
 dotenv.config();
 
@@ -74,6 +78,9 @@ app.use("/api/application", applicationRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/task", taskRoutes);
+app.use("/api/review", reviewRoutes);
+app.use("/api/report", reportRoutes);
+app.use("/api/test", testRoutes);
 app.post("/payment", paymentHandler);
 
 // Quản lý kết nối Socket.IO
@@ -130,6 +137,6 @@ io.on("connection", (socket) => {
     });
   });
 });
-
+startAgenda();
 // Start server
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

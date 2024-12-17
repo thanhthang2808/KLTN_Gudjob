@@ -13,4 +13,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['pdfjs-dist'], // Exclude pdfjs-dist from dependency optimization
   },
+  build: {
+    outDir: 'dist', // Thư mục sau khi build
+},
 })

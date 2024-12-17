@@ -15,6 +15,7 @@ import placeholderAvatar from "@/assets/default-user.png"; // Avatar mặc đị
 
 import { Font } from "@react-pdf/renderer";
 import notoSans from "@/assets/fonts/NotoSans-Regular.ttf"; // Tải font Noto Sans
+import { useNavigate } from "react-router-dom";
 
 Font.register({
   family: "Noto Sans",
@@ -37,6 +38,7 @@ const UpdateCV = () => {
   });
 
   const [avatar, setAvatar] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -218,19 +220,23 @@ const handleChangeExperience = (index, value) => {
 
   // Xử lý tải lên Cloudinary
   const handleUploadToCloudinary = async () => {
-    const blob = await pdf(<CVDocument />).toBlob();
+    const cv = await pdf(<CVDocument />).toBlob();
     const formData = new FormData();
-    formData.append("file", blob);
-    formData.append("upload_preset", "your_upload_preset"); // Thay bằng upload preset của Cloudinary
+    formData.append("cv", cv);
+     
 
     try {
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/your_cloud_name/upload`, // Thay bằng tên tài khoản Cloudinary của bạn
-        formData
-      );
+      const response = await axios.put(
+        `${API_URL}/api/user/upload-cv`,
+        formData,
+        {
+            withCredentials: true,
+        }
+    );
 
-      toast.success("CV uploaded successfully!");
-      console.log("Cloudinary URL:", response.data.secure_url);
+      alert("CV uploaded successfully!");
+      console.log("CV:", response.data.cv);
+      navigate("/candidate/my-cv");
     } catch (error) {
       console.error("Error uploading CV:", error);
       toast.error("Failed to upload CV.");

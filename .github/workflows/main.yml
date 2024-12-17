@@ -34,4 +34,5 @@ jobs:
           heroku_app_name: "gudjob-production-app" #Must be unique in Heroku
           heroku_email: "thanhthang2808@gmail.com"
           appdir: "server" 
+          procfile: "web: npm start"
           

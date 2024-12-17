@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+import plugin from 'tailwindcss/plugin';
 const config = {
     darkMode: ['class'],
     content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
@@ -53,7 +54,7 @@ const config = {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [plugin],
 };
 
 export default config;

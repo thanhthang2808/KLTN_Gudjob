@@ -1,6 +1,7 @@
+import InterviewModal from "@/components/ui/interview-modal";
 import { handleChat } from "@/services/chat-service";
 import axios from "axios";
-import { CirclePlus } from "lucide-react";
+import { Calendar, CirclePlus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +13,9 @@ const MyPosts = () => {
   const [applicationsCount, setApplicationsCount] = useState({});
   const [applicationsData, setApplicationsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState(null);
   const [modalJobId, setModalJobId] = useState(null);
+  const [isOpenInterviewModal, setIsOpenInterviewModal] = useState(false);
   const [deletedJob, setDeletedJob] = useState(null);
   const [type, setType] = useState("");
   const navigate = useNavigate(); // Navigation hook
@@ -132,6 +135,13 @@ const MyPosts = () => {
     }
   };
 
+  const openInterviewModal = (application) => {
+    setSelectedApplication(application); // Set selected application
+    setIsOpenInterviewModal(true); // Open the modal
+  };
+
+  
+
   return (
     <div className="myJobs page bg-gray-100 min-h-screen p-5">
       <div className="container mx-auto">
@@ -172,23 +182,29 @@ const MyPosts = () => {
                       className="bg-gray-100 p-4 rounded-lg shadow-sm flex justify-between items-start"
                     >
                       <div className="flex flex-col space-y-2 w-4/5">
-                        <div className="font-semibold text-lg">
+                        <div className="font-semibold text-lg hover:text-blue-500 hover:underline cursor-pointer" onClick={() => navigate(`/recruiter/candidate/${application.applicantID.user}`)}>
                           {application.name}
                         </div>
-                        <div className="text-sm">
+                        {/* <div className="text-sm">
                           Email: {application.email}
                         </div>
                         <div className="text-sm">
                           Phone: {application.phone}
+                        </div> */}
+                        <div className="text-sm">
+                          Địa chỉ: {application.address}
                         </div>
                         <div className="text-sm">
-                          Address: {application.address}
+                          Cover letter: 
+                        </div>
+                        <div className="text-sm bg-gray-200 p-2 rounded-md">
+                         {application.coverLetter}
                         </div>
                         <div className="text-sm">
-                          Status: {application.status}
+                          Trạng thái: {application.status}
                         </div>
                         <a
-                          href={application.resume.url}
+                          href={`https://docs.google.com/gview?url=${application.resume.url}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline"
@@ -244,6 +260,20 @@ const MyPosts = () => {
                         >
                           Giao việc
                         </button>)}
+                        {application.status === "Accepted" && type !== "Tự do" && (<button
+                        onClick={() => openInterviewModal(application)}
+                         
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        >
+                          <Calendar size={20} className="inline-block mr-2" />
+                          Phỏng vấn
+                        </button>)}
+                        {isOpenInterviewModal && (
+                          <InterviewModal
+                            onClose={() => setIsOpenInterviewModal(false)}
+                            application={selectedApplication}
+                          />
+                        )}
                       </div>
                     </div>
                   ))}
@@ -254,7 +284,6 @@ const MyPosts = () => {
             </div>
           </div>
         )}
-
         {/* Job List */}
         {myJobs.length > 0 ? (
           <div className="space-y-6">
@@ -303,11 +332,14 @@ const MyPosts = () => {
                     >
                       Xóa
                     </button>
-                    {job.workType === "Tự do" && (
+                    {job.workType === "Tự do" ? (
               <div className=" bottom-1 right-1 text-md px-1 py-1 rounded-lg mt-10 ml-10">
-                <text className="text-green-400 font-bold">Việc làm Freelance</text>
+                <div className="text-green-400 font-bold">Việc làm Freelance</div>
               </div>
-            )}
+            ) : (<div className=" bottom-1 right-1 text-md px-1 py-1 rounded-lg mt-10 ml-10">
+              <div className="text-white font-bold">Việc làm Freelance</div>
+            </div>)}
+
                   </div>
                 </div>
                 

@@ -1,6 +1,7 @@
 const Conversation = require("../../models/Conversation");
 const Message = require("../../models/Message");
 const User = require("../../models/User");
+const mongoose = require("mongoose");
 
 // Tạo cuộc trò chuyện
 const createConversation = async (req, res) => {
@@ -103,23 +104,23 @@ const getMessages = async (req, res) => {
   }
 };
 
+// Lấy số tin nhắn chưa đọc
+
+
 // Đánh dấu tin nhắn đã đọc
-const markMessageAsRead = async (req, res) => {
-  const { messageId, userId } = req.body;
+const markMessagesAsRead = async (req, res) => {
+  const { conversationId } = req.body;
+  const userId = req.user.id;
 
   try {
-    const message = await Message.findById(messageId);
+    const messages = await Message.updateMany(
+      { conversationId, readBy: { $ne: userId } }, // Lọc các tin nhắn chưa đọc bởi userId
+      { $push: { readBy: userId } } // Thêm userId vào danh sách readBy
+    );
 
-    if (!message.readBy.includes(userId)) {
-      message.readBy.push(userId); // Thêm user vào danh sách readBy
-      await message.save();
-    }
-
-    res.status(200).json({ message: "Tin nhắn đã được đánh dấu là đã đọc." });
+    res.status(200).json({ message: "Đã đánh dấu tất cả tin nhắn là đã đọc.", updatedCount: messages.modifiedCount });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Lỗi khi đánh dấu tin nhắn đã đọc", error });
+    res.status(500).json({ message: "Lỗi khi đánh dấu tin nhắn.", error });
   }
 };
 
@@ -161,13 +162,58 @@ const getOtherPersonInConversation = async (req, res) => {
   }
 };
 
+const getUnreadMessagesForUser = async (req, res) => {
+  const userId = new mongoose.Types.ObjectId(req.user.id); // Sử dụng `new` để tạo ObjectId
 
+  try {
+    // Tìm tất cả các cuộc trò chuyện mà user tham gia
+    const userConversations = await Conversation.find({ members: userId });
+
+    if (!userConversations || userConversations.length === 0) {
+      return res.status(200).json({ totalUnread: 0, conversationUnread: {} });
+    }
+
+    const conversationIds = userConversations.map((conv) => conv._id);
+
+    // Đếm tin nhắn chưa đọc cho từng cuộc trò chuyện
+    const unreadCounts = await Message.aggregate([
+      {
+        $match: {
+          conversationId: { $in: conversationIds },  // Tin nhắn trong các cuộc trò chuyện đã chọn
+          readBy: { $ne: userId },                    // Tin nhắn chưa đọc bởi userId
+          sender: { $ne: userId },                    // Tin nhắn không phải do người dùng gửi
+        },
+      },
+      {
+        $group: {
+          _id: "$conversationId",     // Nhóm theo conversationId
+          count: { $sum: 1 },          // Đếm số tin nhắn chưa đọc
+        },
+      },
+    ]);
+    
+
+    // Tính tổng số tin nhắn chưa đọc
+    const totalUnread = unreadCounts.reduce((sum, item) => sum + item.count, 0);
+
+    // Chuyển đổi kết quả thành dạng map: { conversationId: count }
+    const conversationUnread = unreadCounts.reduce((map, item) => {
+      map[item._id] = item.count;
+      return map;
+    }, {});
+
+    res.status(200).json({ totalUnread, conversationUnread });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi lấy số lượng tin nhắn chưa đọc.", error });
+  }
+};
 
 module.exports = {
   createConversation,
   sendMessage,
   getConversations,
   getMessages,
-  markMessageAsRead,
+  markMessagesAsRead,
   getOtherPersonInConversation,
+  getUnreadMessagesForUser
 };

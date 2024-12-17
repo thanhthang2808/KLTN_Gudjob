@@ -28,3 +28,13 @@ export const getOtherPersonInfoInConversation = async (conversationId) => {
     }
   };
 
+export const getTotalUnreadMessages = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/chat/unread-messages`, {
+        withCredentials: true,
+      });
+      return data.totalUnread;
+    } catch (error) {
+      console.error("Lỗi khi lấy số tin nhắn chưa đọc:", error);
+    }
+  };

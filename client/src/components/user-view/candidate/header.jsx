@@ -10,6 +10,8 @@ import {
   Home,
   Bell,
   MessageCircle,
+  ListChecks,
+  KeyRound,
 } from "lucide-react"; // Added icons for dropdown items
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/store/auth-slice";
@@ -18,6 +20,7 @@ import { useState, useEffect } from "react";
 import logo from "@/assets/logo-gudjob.jpg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getTotalUnreadMessages } from "@/services/chat-service";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -30,6 +33,7 @@ function CandidateHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [jobsDropdownOpen, setJobsDropdownOpen] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
 
   useEffect(() => {
     const getInfo = async () => {
@@ -58,6 +62,19 @@ function CandidateHeader() {
       }
     };
     getWallet();
+  }, []);
+
+  useEffect(() => {
+    const fetchTotalUnreadMessages = async () => {
+      try {
+        const unreadCount = await getTotalUnreadMessages();
+        setTotalUnread(unreadCount); // Store the result in the state
+      } catch (error) {
+        console.error("Lỗi khi lấy số tin nhắn chưa đọc:", error);
+      }
+    };
+
+    fetchTotalUnreadMessages(); // Call the service when the component mounts
   }, []);
 
   const handleLogout = () => {
@@ -137,7 +154,7 @@ function CandidateHeader() {
                 </li>
                 <li
                   className="p-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2 rounded-lg"
-                  onClick={() => navigate("/candidate/savedjobs")}
+                  onClick={() => navigate("/candidate/saved-jobs")}
                 >
                   <Bookmark size={16} /> Việc làm đã lưu
                 </li>
@@ -156,7 +173,7 @@ function CandidateHeader() {
         </div> */}
 
         <div
-          onClick={() => navigate("/candidate/update-cv")}
+          onClick={() => navigate("/candidate/my-cv")}
           className="font-bold hover:text-green-500 text-sm px-3 h-full py-4 hover:bg-gray-800 rounded flex items-center cursor-pointer"
         >
           Hồ sơ của tôi
@@ -175,12 +192,12 @@ function CandidateHeader() {
       {/* User Avatar on Right */}
       <div className="relative flex items-center md:space-x-4 p-2">
         {/* Notification Button */}
-        <div className="relative cursor-pointer">
+        {/* <div className="relative cursor-pointer">
           <Bell size={24} className="text-gray-500 hover:text-gray-800" />
           <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
-            3 {/* Example notification count */}
+            3 
           </span>
-        </div>
+        </div> */}
 
         {/* Messaging Button */}
         <div className="relative cursor-pointer" onClick={() => navigate("/conversation/")}>
@@ -188,9 +205,11 @@ function CandidateHeader() {
             size={24}
             className="text-gray-500 hover:text-gray-800"
           />
-          <span className="absolute top-0 right-0 h-4 w-4 bg-blue-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
-            5 {/* Example message count */}
+          {totalUnread > 0 && (
+            <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+            {totalUnread}
           </span>
+          )}
         </div>
 
         {/* User Avatar */}
@@ -220,6 +239,21 @@ function CandidateHeader() {
               </div>
             </div>
             <ul className="text-sm">
+            <li
+                className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
+                onClick={() => navigate("/candidate/mywallet")}
+              >
+                <Wallet size={16} /> Ví của tôi{" "}
+                <span className="text-green-600">
+                  {formatAmount(walletBalance)}
+                </span>
+              </li>
+              <li
+                className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
+                onClick={() => navigate("/candidate/mytasks")}
+              >
+                <ListChecks size={16} /> Nhiệm vụ freelance
+              </li>
               <li
                 className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
                 onClick={() => navigate("/candidate/profile")}
@@ -228,12 +262,9 @@ function CandidateHeader() {
               </li>
               <li
                 className="p-2 hover:bg-gray-200 flex items-center gap-2 cursor-pointer"
-                onClick={() => navigate("/candidate/mywallet")}
+                onClick={() => navigate("/candidate/security-settings")}
               >
-                <Wallet size={16} /> Ví của tôi{" "}
-                <span className="text-green-600">
-                  {formatAmount(walletBalance)}
-                </span>
+                <KeyRound size={16} /> Cài đặt bảo mật
               </li>
               <li
                 className="p-2 hover:bg-red-100 text-red-600 flex items-center gap-2 cursor-pointer"

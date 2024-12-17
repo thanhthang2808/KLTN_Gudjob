@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema({
       default: "https://res.cloudinary.com/dpocdj6eu/image/upload/v1728065130/ksf2naqlfcnahv1ck1cm.png",
     },
   },
+  cv: {
+    type: [
+      {
+        public_id: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
+      },
+    ]
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -58,7 +70,9 @@ const userSchema = new mongoose.Schema({
   numberOfEmployees: {
     type: Number,
   },
-  // Thông tin bổ sung cho Candidate
+  industry: {
+    type: String,
+  },
   skills: {
     type: [String], // Mảng chứa các kỹ năng
     required: function () {
@@ -80,6 +94,18 @@ const userSchema = new mongoose.Schema({
     },
     default: [],
   },
+  savedJobs: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Job",
+      },
+    ],
+    required: function () {
+      return this.role === "Candidate";
+    },
+    default: [],
+  },
   status: {
     type: String,
     enum: ["active", "locked"],
@@ -87,6 +113,10 @@ const userSchema = new mongoose.Schema({
     required: function () {
       return this.role !== "Admin"; // Only required for non-admin users
     },
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
   },
 });
 

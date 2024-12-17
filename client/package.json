@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.5.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.1.10",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-select": "^2.1.1",
@@ -25,6 +29,8 @@
     "lucide-react": "^0.445.0",
     "pdfjs-dist": "^4.6.82",
     "react": "^18.3.1",
+    "react-countup": "^6.5.3",
+    "react-datepicker": "^7.5.0",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-modal": "^3.16.1",

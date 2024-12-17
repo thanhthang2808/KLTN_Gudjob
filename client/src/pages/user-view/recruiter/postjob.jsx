@@ -23,7 +23,7 @@ const PostJob = () => {
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
   const [fixedSalary, setFixedSalary] = useState("");
-  const [salaryType, setSalaryType] = useState("default");
+  const [salaryType, setSalaryType] = useState("Fixed Salary");
   const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
@@ -142,7 +142,7 @@ const PostJob = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-4xl w-full">
         <h3 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          Post New Job
+          Đăng tin tuyển dụng mới
         </h3>
         <form onSubmit={handleJobPost} className="space-y-6">
           {/* Job Title */}
@@ -153,7 +153,7 @@ const PostJob = () => {
                 htmlFor="title"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Job Title
+                Tiêu đề
               </label>
               <input
                 type="text"
@@ -172,7 +172,7 @@ const PostJob = () => {
                 htmlFor="vacancies"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Vacancies
+                Số lượng
               </label>
               <input
                 type="number"
@@ -190,7 +190,7 @@ const PostJob = () => {
                 htmlFor="gender"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Gender
+                Giới tính
               </label>
               <select
                 id="gender"
@@ -211,7 +211,7 @@ const PostJob = () => {
               htmlFor="category"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Category
+              Danh mục
             </label>
             <select
               id="category"
@@ -220,7 +220,7 @@ const PostJob = () => {
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select Category</option>
+              <option value="">Chọn danh mục</option>
               <option value="Kinh doanh/Bán hàng">Kinh doanh/Bán hàng</option>
               <option value="Marketing/PR/Quảng cáo">
                 Marketing/PR/Quảng cáo
@@ -260,7 +260,7 @@ const PostJob = () => {
             {/* Work Type, Level & Experience  */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Work Type
+                Loại công việc
               </label>
               <select
                 id="workType"
@@ -277,7 +277,7 @@ const PostJob = () => {
             </div>
             {workType !== "Tự do" && (<div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Level
+                Trình độ
               </label>
               <select
                 id="level"
@@ -295,7 +295,7 @@ const PostJob = () => {
             </div>)}
             {workType !== "Tự do" && (<div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Experience
+                Kinh nghiệm
               </label>
               <select
                 id="experience"
@@ -325,7 +325,7 @@ const PostJob = () => {
                 htmlFor="country"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Country
+                Quốc gia
               </label>
               <input
                 type="text"
@@ -342,7 +342,7 @@ const PostJob = () => {
                 htmlFor="city"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                City
+                Thành phố
               </label>
               <input
                 type="text"
@@ -362,7 +362,7 @@ const PostJob = () => {
               htmlFor="location"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Location
+              Địa điểm
             </label>
             <input
               type="text"
@@ -381,7 +381,7 @@ const PostJob = () => {
               htmlFor="salaryType"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Salary Type
+              Loại lương
             </label>
             <select
               id="salaryType"
@@ -390,9 +390,8 @@ const PostJob = () => {
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="default">Select Salary Type</option>
-              <option value="Fixed Salary">Fixed Salary</option>
-              <option value="Ranged Salary">Ranged Salary</option>
+              <option value="Fixed Salary">Lương cố định</option>
+              <option value="Ranged Salary">Mức lương dao động</option>
             </select>
           </div>
 
@@ -403,7 +402,7 @@ const PostJob = () => {
                 htmlFor="fixedSalary"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Fixed Salary
+                Lương cố định
               </label>
               <input
                 type="number"
@@ -423,7 +422,7 @@ const PostJob = () => {
                   htmlFor="salaryFrom"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Salary From
+                  Từ
                 </label>
                 <input
                   type="number"
@@ -440,7 +439,7 @@ const PostJob = () => {
                   htmlFor="salaryTo"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Salary To
+                  Đến
                 </label>
                 <input
                   type="number"
@@ -461,7 +460,7 @@ const PostJob = () => {
               htmlFor="skills"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Required Skills
+              Kỹ năng yêu cầu
             </label>
             <input
               type="text"
@@ -491,7 +490,7 @@ const PostJob = () => {
               htmlFor="description"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Job Description
+              Mô tả công việc
             </label>
             <textarea
               id="description"
@@ -511,7 +510,7 @@ const PostJob = () => {
                 htmlFor="applicationDeadline"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Application Deadline
+                Thời hạn ứng tuyển
               </label>
               <input
                 type="date"
@@ -530,7 +529,7 @@ const PostJob = () => {
             type="submit"
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Create Job
+            Đăng tin tuyển dụng
           </button>
         </form>
       </div>
@@ -553,8 +552,8 @@ const PostJob = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <h2 className="text-lg font-semibold">Success!</h2>
-            <p className="mt-2">Job posted successfully.</p>
+            <h2 className="text-lg font-semibold">Thành công!</h2>
+            <p className="mt-2">Đăng tin tuyển dụng thành công.</p>
           </div>
         </div>
       )}
